@@ -84,7 +84,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href={role.href}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
                   <ZapIcon className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -98,7 +98,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={NAV_BY_ROLE[role.slug]} />
-        <NavSecondary items={NAV_SECONDARY} className="mt-auto" />
+        {/* <NavSecondary items={NAV_SECONDARY} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={DEMO_USER} />
