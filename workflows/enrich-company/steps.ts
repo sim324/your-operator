@@ -152,6 +152,11 @@ export async function scrapeCompanyStep(domain: string) {
 }
 
 const CompanyInfoSchema = z.object({
+  company_name: z
+    .string()
+    .describe(
+      "The company's actual display/brand name (e.g. 'Denver Dream Dentistry'), not the domain",
+    ),
   business_type: z
     .string()
     .describe("e.g. 'B2B SaaS', 'e-commerce', 'professional services'"),
@@ -290,6 +295,7 @@ export async function saveEnrichmentStep(
   const { error } = await supabase
     .from("lead_companies")
     .update({
+      name: result.enrichment.company_name,
       logo_url: result.logoUrl,
       embeddable: result.embeddable,
       enrichment: result.enrichment,
