@@ -9,10 +9,10 @@ import type {
   LeadCompanySource,
   LeadCompanyStatus,
 } from "@/lib/supabase/models";
+import { LEAD_COMPANY_COOKIE } from "@/lib/intake/constants";
 import { enrichCompanyWorkflow } from "@/workflows/enrich-company";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const LEAD_COMPANY_COOKIE = "demo_lead_company_id";
 
 export interface SubmitIntakeInput {
   email: string;

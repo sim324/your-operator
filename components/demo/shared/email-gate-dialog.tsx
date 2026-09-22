@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
@@ -17,6 +18,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -72,6 +74,7 @@ const intakeFormSchema = z
 type IntakeFormValues = z.infer<typeof intakeFormSchema>;
 
 export default function EmailGateDialog() {
+  const router = useRouter();
   const [open, setOpen] = useState(true);
   const [validated, setValidated] = useState(false);
   const [companyId, setCompanyId] = useState<string | null>(null);
@@ -133,6 +136,11 @@ export default function EmailGateDialog() {
       });
       if (result.ok) setCompanyId(result.companyId ?? null);
     });
+  }
+
+  function handleContinueToDemo() {
+    setOpen(false);
+    router.push("/demo/prospect");
   }
 
   const submitted = validated || companyId !== null;
@@ -314,6 +322,12 @@ export default function EmailGateDialog() {
               {isPending ? "Continuing…" : "Continue"}
             </Button>
           </form>
+        )}
+
+        {submitted && (
+          <DialogFooter>
+            <Button onClick={handleContinueToDemo}>Continue to demo</Button>
+          </DialogFooter>
         )}
       </DialogContent>
     </Dialog>
