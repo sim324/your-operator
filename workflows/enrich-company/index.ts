@@ -30,6 +30,7 @@ export async function enrichCompanyWorkflow(companyId: string, domain: string) {
       logoUrl,
       embeddable,
       enrichment,
+      scrapedContent: scraped.markdown,
     });
   } catch (err) {
     await markFailedStep(

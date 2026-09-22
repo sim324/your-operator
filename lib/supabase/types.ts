@@ -50,6 +50,7 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string | null
+          scraped_content: string | null
           source: string
           status: string
           updated_at: string
@@ -64,6 +65,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string | null
+          scraped_content?: string | null
           source?: string
           status?: string
           updated_at?: string
@@ -78,6 +80,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string | null
+          scraped_content?: string | null
           source?: string
           status?: string
           updated_at?: string

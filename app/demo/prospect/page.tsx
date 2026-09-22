@@ -81,6 +81,7 @@ export default async function DemoProspectPage() {
                         enrichment.products_services?.join(", ") ?? "",
                       sells_to: enrichment.sells_to ?? "",
                       about: enrichment.about ?? "",
+                      site_content: company.scraped_content ?? "",
                     }
                   : undefined
               }

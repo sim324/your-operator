@@ -287,6 +287,7 @@ export async function saveEnrichmentStep(
     logoUrl: string | null;
     embeddable: boolean;
     enrichment: CompanyInfo;
+    scrapedContent: string;
   },
 ) {
   "use step";
@@ -299,6 +300,7 @@ export async function saveEnrichmentStep(
       logo_url: result.logoUrl,
       embeddable: result.embeddable,
       enrichment: result.enrichment,
+      scraped_content: result.scrapedContent,
       status: STATUS_ENRICHED,
       source: SOURCE_FIRECRAWL,
     })
