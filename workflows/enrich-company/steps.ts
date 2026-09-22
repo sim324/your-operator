@@ -53,12 +53,50 @@ async function firecrawlRequest(path: string, body: unknown) {
   return response.json();
 }
 
-function extractThemeColor(html: string | undefined): string | null {
-  if (!html) return null;
-  const match = html.match(
-    /<meta[^>]+name=["']theme-color["'][^>]+content=["']([^"']+)["']/i,
-  );
-  return match?.[1] ?? null;
+// Best-to-worst candidates for a square, brand-representative logo image.
+// apple-touch-icon is usually a clean high-res square PNG; a generic <link
+// rel="icon"> can point at anything, so prefer the largest declared size;
+// /favicon.ico and ogImage (often a large marketing banner, not a logo) are
+// last resorts. The caller tries each in order until one actually fetches as
+// an image.
+function extractLogoCandidates(
+  html: string | undefined,
+  pageUrl: string,
+  ogImage: string | undefined,
+): string[] {
+  const candidates: { href: string; rank: number; size: number }[] = [];
+
+  if (html) {
+    const linkTagPattern = /<link\b[^>]*>/gi;
+    for (const [tag] of html.matchAll(linkTagPattern)) {
+      const relMatch = tag.match(/rel=["']([^"']+)["']/i);
+      const hrefMatch = tag.match(/href=["']([^"']+)["']/i);
+      if (!relMatch || !hrefMatch) continue;
+
+      const rel = relMatch[1].toLowerCase();
+      const isAppleTouchIcon = rel.includes("apple-touch-icon");
+      const isIcon = rel === "icon" || rel === "shortcut icon";
+      if (!isAppleTouchIcon && !isIcon) continue;
+
+      const sizeMatch = tag.match(/sizes=["'](\d+)x\d+["']/i);
+      const size = sizeMatch ? Number(sizeMatch[1]) : 0;
+
+      try {
+        const href = new URL(hrefMatch[1], pageUrl).toString();
+        candidates.push({ href, rank: isAppleTouchIcon ? 0 : 1, size });
+      } catch {
+        // Ignore unparsable hrefs (e.g. data: URIs mangled by regex capture).
+      }
+    }
+  }
+
+  candidates.sort((a, b) => a.rank - b.rank || b.size - a.size);
+
+  const ordered = candidates.map((c) => c.href);
+  ordered.push(new URL("/favicon.ico", pageUrl).toString());
+  if (ogImage) ordered.push(ogImage);
+
+  return [...new Set(ordered)];
 }
 
 export async function scrapeCompanyStep(domain: string) {
@@ -105,8 +143,11 @@ export async function scrapeCompanyStep(domain: string) {
 
   return {
     markdown: markdown.slice(0, 15000),
-    logoUrl: home?.metadata?.ogImage ?? home?.metadata?.favicon ?? null,
-    themeColor: extractThemeColor(home?.html),
+    logoCandidates: extractLogoCandidates(
+      home?.html,
+      homepageUrl,
+      home?.metadata?.ogImage,
+    ),
   };
 }
 
@@ -155,34 +196,39 @@ export async function structureCompanyStep(
 
 export async function uploadLogoStep(
   companyId: string,
-  logoUrl: string,
+  logoCandidates: string[],
 ): Promise<string | null> {
   "use step";
 
-  const response = await fetch(logoUrl);
-  if (!response.ok || !response.headers.get("content-type")?.startsWith("image/")) {
-    return null;
+  for (const candidateUrl of logoCandidates) {
+    const response = await fetch(candidateUrl).catch(() => null);
+    const contentType = response?.headers.get("content-type") ?? "";
+    if (!response?.ok || !contentType.startsWith("image/")) continue;
+
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const extension = contentType.includes("svg")
+      ? "svg"
+      : contentType.includes("icon")
+        ? "ico"
+        : contentType.includes("jpeg")
+          ? "jpg"
+          : "png";
+    const path = `${companyId}.${extension}`;
+
+    const supabase = getSupabaseServerClient();
+    const { error } = await supabase.storage
+      .from("lead-logos")
+      .upload(path, bytes, { contentType, upsert: true });
+
+    if (error) {
+      throw new Error(`Failed to upload logo: ${error.message}`);
+    }
+
+    return supabase.storage.from("lead-logos").getPublicUrl(path).data
+      .publicUrl;
   }
 
-  const contentType = response.headers.get("content-type") ?? "image/png";
-  const bytes = Buffer.from(await response.arrayBuffer());
-  const extension = contentType.includes("svg")
-    ? "svg"
-    : contentType.includes("jpeg")
-      ? "jpg"
-      : "png";
-  const path = `${companyId}.${extension}`;
-
-  const supabase = getSupabaseServerClient();
-  const { error } = await supabase.storage
-    .from("lead-logos")
-    .upload(path, bytes, { contentType, upsert: true });
-
-  if (error) {
-    throw new Error(`Failed to upload logo: ${error.message}`);
-  }
-
-  return supabase.storage.from("lead-logos").getPublicUrl(path).data.publicUrl;
+  return null;
 }
 
 export async function updateStatusStep(
@@ -199,7 +245,6 @@ export async function saveEnrichmentStep(
   companyId: string,
   result: {
     logoUrl: string | null;
-    brandColor: string | null;
     enrichment: CompanyInfo;
   },
 ) {
@@ -210,7 +255,6 @@ export async function saveEnrichmentStep(
     .from("lead_companies")
     .update({
       logo_url: result.logoUrl,
-      brand_color: result.brandColor,
       enrichment: result.enrichment,
       status: STATUS_ENRICHED,
       source: SOURCE_FIRECRAWL,

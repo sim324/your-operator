@@ -17,13 +17,11 @@ export async function enrichCompanyWorkflow(companyId: string, domain: string) {
     await updateStatusStep(companyId, "structuring");
     const enrichment = await structureCompanyStep(scraped.markdown);
 
-    const logoUrl = scraped.logoUrl
-      ? await uploadLogoStep(companyId, scraped.logoUrl)
-      : null;
+    await updateStatusStep(companyId, "uploading");
+    const logoUrl = await uploadLogoStep(companyId, scraped.logoCandidates);
 
     await saveEnrichmentStep(companyId, {
       logoUrl,
-      brandColor: scraped.themeColor,
       enrichment,
     });
   } catch (err) {

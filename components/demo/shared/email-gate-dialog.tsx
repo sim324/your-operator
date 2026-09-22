@@ -6,6 +6,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
 import { submitIntake } from "@/lib/intake/actions";
+import CompanyEnrichmentStatus from "@/components/demo/shared/company-enrichment-status";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -73,6 +74,7 @@ type IntakeFormValues = z.infer<typeof intakeFormSchema>;
 export default function EmailGateDialog() {
   const [open, setOpen] = useState(true);
   const [validated, setValidated] = useState(false);
+  const [companyId, setCompanyId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<IntakeFormValues>({
@@ -112,27 +114,46 @@ export default function EmailGateDialog() {
         return;
       }
 
-      setValidated(true);
+      // The no-website/manual path has no enrichment pipeline yet (that's a
+      // later chunk) - anything with a domain or sample data does, and
+      // CompanyEnrichmentStatus knows how to render every stage of that.
+      if (values.useSampleData || !values.noWebsite) {
+        setCompanyId(result.companyId ?? null);
+      } else {
+        setValidated(true);
+      }
     });
   }
+
+  function handleUseSampleDataInstead() {
+    startTransition(async () => {
+      const result = await submitIntake({
+        email: form.getValues("email"),
+        useSampleData: true,
+      });
+      if (result.ok) setCompanyId(result.companyId ?? null);
+    });
+  }
+
+  const submitted = validated || companyId !== null;
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        // Block dismissal until the email has been validated.
-        if (!next && !validated) return;
+        // Block dismissal until the form has been submitted.
+        if (!next && !submitted) return;
         setOpen(next);
       }}
     >
       <DialogContent
         className="sm:max-w-2xl bg-background p-8"
-        showCloseButton={validated}
+        showCloseButton={submitted}
         onEscapeKeyDown={(event) => {
-          if (!validated) event.preventDefault();
+          if (!submitted) event.preventDefault();
         }}
         onInteractOutside={(event) => {
-          if (!validated) event.preventDefault();
+          if (!submitted) event.preventDefault();
         }}
       >
         <DialogHeader>
@@ -144,7 +165,12 @@ export default function EmailGateDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        {validated ? (
+        {companyId ? (
+          <CompanyEnrichmentStatus
+            companyId={companyId}
+            onUseSampleDataInstead={handleUseSampleDataInstead}
+          />
+        ) : validated ? (
           <p className="text-sm text-muted-foreground">
             Thanks — close this to continue exploring the demo.
           </p>

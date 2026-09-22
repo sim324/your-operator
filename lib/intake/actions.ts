@@ -26,6 +26,10 @@ export interface SubmitIntakeResult {
   ok: boolean;
   error?: string;
   companyId?: string;
+  // True when enrichment was just kicked off async and the caller should
+  // watch the company row (e.g. via Realtime) for progress, rather than
+  // treating it as already finished.
+  isEnriching?: boolean;
 }
 
 // "https://www.acme.com/pricing" -> "acme.com"
@@ -179,6 +183,7 @@ export async function submitIntake(
     return { ok: false, error: contactResult.error };
   }
 
+  const isEnriching = Boolean(companyResult.enrichDomain);
   if (companyResult.enrichDomain) {
     await start(enrichCompanyWorkflow, [
       companyResult.companyId,
@@ -193,5 +198,5 @@ export async function submitIntake(
     sameSite: "lax",
   });
 
-  return { ok: true, companyId: companyResult.companyId };
+  return { ok: true, companyId: companyResult.companyId, isEnriching };
 }
