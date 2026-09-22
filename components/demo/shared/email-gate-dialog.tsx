@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
-import { submitIntake } from "@/lib/intake/actions";
+import { clearLeadCompanyCookie, submitIntake } from "@/lib/intake/actions";
 import CompanyEnrichmentStatus from "@/components/demo/shared/company-enrichment-status";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,11 +73,23 @@ const intakeFormSchema = z
 
 type IntakeFormValues = z.infer<typeof intakeFormSchema>;
 
-export default function EmailGateDialog() {
+interface EmailGateDialogProps {
+  // Prefilled from the demo_lead_company_id cookie server-side, when a
+  // returning visitor already has a company with real results to show.
+  initialCompanyId?: string | null;
+  // Set instead of initialCompanyId for a returning no-website/manual
+  // submission, which has no pipeline/results to show.
+  initialValidated?: boolean;
+}
+
+export default function EmailGateDialog({
+  initialCompanyId = null,
+  initialValidated = false,
+}: EmailGateDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(true);
-  const [validated, setValidated] = useState(false);
-  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [validated, setValidated] = useState(initialValidated);
+  const [companyId, setCompanyId] = useState<string | null>(initialCompanyId);
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<IntakeFormValues>({
@@ -143,6 +155,15 @@ export default function EmailGateDialog() {
     router.push("/demo/prospect");
   }
 
+  function handleStartOver() {
+    startTransition(async () => {
+      await clearLeadCompanyCookie();
+      setCompanyId(null);
+      setValidated(false);
+      form.reset();
+    });
+  }
+
   const submitted = validated || companyId !== null;
 
   return (
@@ -169,7 +190,9 @@ export default function EmailGateDialog() {
             See it in action
           </DialogTitle>
           <DialogDescription className="text-2xl">
-            Share a bit about you and your company to continue.
+            {submitted
+              ? "Welcome back — here's what we found."
+              : "Share a bit about you and your company to continue."}
           </DialogDescription>
         </DialogHeader>
 
@@ -326,6 +349,13 @@ export default function EmailGateDialog() {
 
         {submitted && (
           <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={isPending}
+              onClick={handleStartOver}
+            >
+              Start over
+            </Button>
             <Button onClick={handleContinueToDemo}>Continue to demo</Button>
           </DialogFooter>
         )}

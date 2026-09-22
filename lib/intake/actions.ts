@@ -200,3 +200,8 @@ export async function submitIntake(
 
   return { ok: true, companyId: companyResult.companyId, isEnriching };
 }
+
+export async function clearLeadCompanyCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(LEAD_COMPANY_COOKIE);
+}
