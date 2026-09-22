@@ -87,7 +87,11 @@ export default function EmailGateDialog({
   initialValidated = false,
 }: EmailGateDialogProps) {
   const router = useRouter();
-  const [open, setOpen] = useState(true);
+  // A returning visitor we already know (via cookie) doesn't need the gate
+  // to pop open on every page load - the role-switcher banner shows their
+  // company persistently instead. Only a brand-new visitor gets gated.
+  const alreadyKnown = initialCompanyId !== null || initialValidated;
+  const [open, setOpen] = useState(!alreadyKnown);
   const [validated, setValidated] = useState(initialValidated);
   const [companyId, setCompanyId] = useState<string | null>(initialCompanyId);
   const [isPending, startTransition] = useTransition();

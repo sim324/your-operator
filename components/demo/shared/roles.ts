@@ -12,4 +12,4 @@ export const DEMO_ROLES: DemoRoleConfig[] = [
   { slug: "prospect", label: "Prospect", href: "/demo/prospect" },
 ];
 
-export const DEFAULT_DEMO_ROLE: DemoRole = "rep";
+export const DEFAULT_DEMO_ROLE: DemoRole = "prospect";

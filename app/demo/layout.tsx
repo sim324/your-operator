@@ -21,10 +21,16 @@ export default async function DemoLayout({ children }: LayoutProps<"/demo">) {
   return (
     <div className="flex h-svh flex-col">
       <EmailGateDialog
+        // Remounts (and re-initializes its state) when the known company
+        // changes - notably back to "none" right after Start over clears the
+        // cookie, so the dialog goes back to auto-opening for a fresh visit.
+        key={company?.id ?? "none"}
         initialCompanyId={hasPipeline && company ? company.id : null}
         initialValidated={company !== null && !hasPipeline}
       />
-      <RoleSwitcherBanner />
+      <RoleSwitcherBanner
+        companyName={company?.name ?? company?.domain ?? null}
+      />
       <AppShell>{children}</AppShell>
     </div>
   );

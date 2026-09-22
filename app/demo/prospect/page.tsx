@@ -1,5 +1,6 @@
 import ElevenLabsWidget from "@/components/demo/prospect/elevenlabs-widget";
 import PageTitle from "@/components/demo/shared/page-title";
+import { Badge } from "@/components/ui/badge";
 import { getCurrentLeadCompany } from "@/lib/intake/current-company";
 
 interface CompanyEnrichment {
@@ -20,22 +21,9 @@ export default async function DemoProspectPage() {
   const companyName = company?.name ?? company?.domain ?? undefined;
 
   return (
-    <div className="flex flex-col gap-2">
-      <PageTitle>Prospect Intake</PageTitle>
-
-      {company?.domain && !blocked && (
-        <p className="text-muted-foreground">
-          Live preview of{" "}
-          <span className="font-medium text-foreground">
-            {company.domain}
-          </span>{" "}
-          — the AI intake conversation and booking/payment options will float
-          on top of this.
-        </p>
-      )}
-
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
       {company ? (
-        <div className="relative h-[70vh] w-full overflow-hidden rounded-2xl border border-border">
+        <div className="relative h-full min-h-0 w-full overflow-hidden border border-border bg-muted">
           {company.domain && !blocked ? (
             <iframe
               src={`https://${company.domain}`}

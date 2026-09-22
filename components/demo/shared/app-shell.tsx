@@ -24,9 +24,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <AppSidebar className="h-full" />
         <SidebarInset className="overflow-y-auto">
           <AppHeader />
-          <div className="flex flex-1 flex-col gap-4 p-4 sm:p-6 lg:p-8">
-            {children}
-          </div>
+          <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>
