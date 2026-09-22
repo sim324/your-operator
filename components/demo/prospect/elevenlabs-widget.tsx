@@ -15,9 +15,7 @@ declare module "react" {
         "agent-id": string;
         "avatar-image-url"?: string;
         "dynamic-variables"?: string;
-        variant?: "tiny" | "compact" | "expanded" | "full";
         dismissible?: "true" | "false";
-        "override-first-message"?: string;
       };
     }
   }
@@ -26,14 +24,12 @@ declare module "react" {
 interface ElevenLabsWidgetProps {
   agentId: string;
   avatarImageUrl?: string;
-  companyName?: string;
   dynamicVariables?: Record<string, string>;
 }
 
 export default function ElevenLabsWidget({
   agentId,
   avatarImageUrl,
-  companyName,
   dynamicVariables,
 }: ElevenLabsWidgetProps) {
   return (
@@ -45,16 +41,16 @@ export default function ElevenLabsWidget({
       <elevenlabs-convai
         agent-id={agentId}
         avatar-image-url={avatarImageUrl}
-        variant="expanded"
         dismissible="true"
-        override-first-message={
-          companyName
-            ? `Hey! Thanks for checking out the demo — I see you're from ${companyName}. Want to chat about what Your Operator could do for your team?`
-            : undefined
-        }
         dynamic-variables={
           dynamicVariables ? JSON.stringify(dynamicVariables) : undefined
         }
+        // Positioned within the nearest `position: relative` ancestor (the
+        // iframe preview box) instead of fixed to the whole browser
+        // viewport, so it reads as scoped to "their site" rather than our
+        // app. Inline style wins over the widget's own internal
+        // `:host { position: fixed }`.
+        style={{ position: "absolute", bottom: "1rem", right: "1rem" }}
       />
     </>
   );

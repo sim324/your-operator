@@ -17,7 +17,10 @@ import { AppSidebar } from "./app-sidebar";
 export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <TooltipProvider>
-      <SidebarProvider className="min-h-0 flex-1 transform-gpu">
+      <SidebarProvider
+        defaultOpen={false}
+        className="min-h-0 flex-1 transform-gpu"
+      >
         <AppSidebar className="h-full" />
         <SidebarInset className="overflow-y-auto">
           <AppHeader />
