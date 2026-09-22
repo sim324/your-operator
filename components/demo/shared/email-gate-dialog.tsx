@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useTransition } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import * as z from "zod";
 
+import { submitIntake } from "@/lib/intake/actions";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -10,25 +19,101 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const intakeFormSchema = z
+  .object({
+    email: z.email("Enter a valid email to continue."),
+    domain: z.string(),
+    noWebsite: z.boolean(),
+    companyName: z.string(),
+    companyDescription: z.string(),
+    useSampleData: z.boolean(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.useSampleData) return;
 
-export default function EmailGateDialog() {
-  const [open, setOpen] = useState(true);
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [validated, setValidated] = useState(false);
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!EMAIL_REGEX.test(email)) {
-      setError("Enter a valid email to continue.");
+    if (!data.noWebsite) {
+      if (!data.domain.trim()) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["domain"],
+          message: "Enter your company's domain.",
+        });
+      }
       return;
     }
 
-    setError(null);
-    setValidated(true);
+    if (!data.companyName.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["companyName"],
+        message: "Enter your company name.",
+      });
+    }
+    if (!data.companyDescription.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["companyDescription"],
+        message: "Tell us what you do.",
+      });
+    }
+  });
+
+type IntakeFormValues = z.infer<typeof intakeFormSchema>;
+
+export default function EmailGateDialog() {
+  const [open, setOpen] = useState(true);
+  const [validated, setValidated] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const form = useForm<IntakeFormValues>({
+    resolver: zodResolver(intakeFormSchema),
+    defaultValues: {
+      email: "",
+      domain: "",
+      noWebsite: false,
+      companyName: "",
+      companyDescription: "",
+      useSampleData: false,
+    },
+  });
+
+  const noWebsite = useWatch({ control: form.control, name: "noWebsite" });
+  const useSampleData = useWatch({
+    control: form.control,
+    name: "useSampleData",
+  });
+
+  function onSubmit(values: IntakeFormValues) {
+    startTransition(async () => {
+      const result = await submitIntake({
+        email: values.email,
+        domain: values.noWebsite ? undefined : values.domain,
+        companyName: values.noWebsite ? values.companyName : undefined,
+        companyDescription: values.noWebsite
+          ? values.companyDescription
+          : undefined,
+        useSampleData: values.useSampleData,
+      });
+
+      if (!result.ok) {
+        form.setError("root", {
+          message: result.error ?? "Something went wrong. Try again.",
+        });
+        return;
+      }
+
+      setValidated(true);
+    });
   }
 
   return (
@@ -41,7 +126,7 @@ export default function EmailGateDialog() {
       }}
     >
       <DialogContent
-        className="sm:max-w-4xl bg-background p-8"
+        className="sm:max-w-2xl bg-background p-8"
         showCloseButton={validated}
         onEscapeKeyDown={(event) => {
           if (!validated) event.preventDefault();
@@ -55,14 +140,9 @@ export default function EmailGateDialog() {
             See it in action
           </DialogTitle>
           <DialogDescription className="text-2xl">
-            Watch a quick overview, then enter your email to continue into the
-            demo.
+            Share a bit about you and your company to continue.
           </DialogDescription>
         </DialogHeader>
-
-        <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground">
-          Video placeholder (16:9)
-        </div>
 
         {validated ? (
           <p className="text-sm text-muted-foreground">
@@ -70,24 +150,145 @@ export default function EmailGateDialog() {
           </p>
         ) : (
           <form
-            onSubmit={handleSubmit}
-            className="flex flex-col gap-2 sm:flex-row"
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-6"
           >
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@company.com"
-              className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30"
-            />
-            <Button type="submit" size="lg">
-              Continue
+            <FieldGroup>
+              <Controller
+                name="email"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel htmlFor="email">Work email</FieldLabel>
+                    <Input
+                      {...field}
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@company.com"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+
+              {!useSampleData && (
+                <>
+                  <Controller
+                    name="domain"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field data-invalid={fieldState.invalid}>
+                        <FieldLabel htmlFor="domain">Company domain</FieldLabel>
+                        <Input
+                          {...field}
+                          id="domain"
+                          disabled={noWebsite}
+                          placeholder="yourcompany.com"
+                          aria-invalid={fieldState.invalid}
+                        />
+                        <FieldError errors={[fieldState.error]} />
+                      </Field>
+                    )}
+                  />
+
+                  <Collapsible
+                    open={noWebsite}
+                    onOpenChange={(next) => form.setValue("noWebsite", next)}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <button
+                        type="button"
+                        className="self-start text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                      >
+                        {noWebsite
+                          ? "I have a website"
+                          : "Don't have a website?"}
+                      </button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <FieldGroup className="pt-4">
+                        <Controller
+                          name="companyName"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                              <FieldLabel htmlFor="companyName">
+                                Company name
+                              </FieldLabel>
+                              <Input
+                                {...field}
+                                id="companyName"
+                                placeholder="Acme Robotics"
+                                aria-invalid={fieldState.invalid}
+                              />
+                              <FieldError errors={[fieldState.error]} />
+                            </Field>
+                          )}
+                        />
+                        <Controller
+                          name="companyDescription"
+                          control={form.control}
+                          render={({ field, fieldState }) => (
+                            <Field data-invalid={fieldState.invalid}>
+                              <FieldLabel htmlFor="companyDescription">
+                                What do you do?
+                              </FieldLabel>
+                              <Textarea
+                                {...field}
+                                id="companyDescription"
+                                placeholder="We build autonomous warehouse robots for 3PLs."
+                                rows={2}
+                                aria-invalid={fieldState.invalid}
+                              />
+                              <FieldDescription>
+                                Since we can&apos;t scrape a site, this feeds
+                                the demo instead.
+                              </FieldDescription>
+                              <FieldError errors={[fieldState.error]} />
+                            </Field>
+                          )}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => form.setValue("useSampleData", true)}
+                          className="self-start text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                        >
+                          Or just use sample data instead
+                        </button>
+                      </FieldGroup>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </>
+              )}
+
+              {useSampleData && (
+                <div className="flex items-center justify-between rounded-2xl border border-dashed border-border px-4 py-2 text-sm text-muted-foreground">
+                  <span>Using sample company data.</span>
+                  <button
+                    type="button"
+                    onClick={() => form.setValue("useSampleData", false)}
+                    className="underline underline-offset-4 hover:text-foreground"
+                  >
+                    Undo
+                  </button>
+                </div>
+              )}
+            </FieldGroup>
+
+            <FieldError errors={[form.formState.errors.root]} />
+
+            <Button
+              type="submit"
+              size="lg"
+              disabled={isPending}
+              className="self-start"
+            >
+              {isPending ? "Continuing…" : "Continue"}
             </Button>
           </form>
         )}
-
-        {error && <p className="text-sm text-destructive">{error}</p>}
       </DialogContent>
     </Dialog>
   );

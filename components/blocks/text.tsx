@@ -7,7 +7,7 @@ export default function Heading1({
   return (
     <h1
       className={cn(
-        "text-5xl sm:text-7xl lg:text-9xl font-black tracking-tight",
+        "text-7xl leading-none font-black tracking-tight",
         className
       )}
       {...props}
@@ -16,5 +16,10 @@ export default function Heading1({
 }
 
 export function Subheading({ className, ...props }: React.ComponentProps<"p">) {
-  return <p className={cn("text-2xl/10 font-medium", className)} {...props} />;
+  return (
+    <p
+      className={cn("text-3xl/10 text-balance xl:text-4xl", className)}
+      {...props}
+    />
+  );
 }

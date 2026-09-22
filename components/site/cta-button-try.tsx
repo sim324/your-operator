@@ -9,7 +9,7 @@ type CtaButtonTryProps = Omit<
 >;
 
 export default function CtaButtonTry({
-  variant = "secondary",
+  variant = "outline",
   size = "xl",
   className,
   ...props
@@ -18,7 +18,7 @@ export default function CtaButtonTry({
     <Button
       variant={variant}
       size={size}
-      className={cn("w-fit", className)}
+      className={cn(className)}
       asChild
       {...props}
     >

@@ -337,3 +337,90 @@ Simulation risk is gone. The risk is now chaining several paid third-party calls
 6. Manager view over real plus seeded data
 
 The email gate and the manager screens can be built now, in parallel, because they do not depend on any third party.
+
+---
+
+# Update 3: organization slug and Supabase lookup
+
+This section adds a per-organization slug in the URL and a Supabase backend keyed on it. It answers the earlier persistence question (open question 9 in Update 2): Supabase is the store.
+
+## Recommendation in one paragraph
+
+Derive the slug from the normalized company domain at the moment the email gate is submitted, before the scrape starts. Put it in the **path**, not a query parameter: `/demo/acme-corp/prospect`. Treat the slug as a **public handle for public data** (name, logo, scraped site profile). Keep anything private (chats, transcripts, enrichment of a person, feedback) tied to a separate, unguessable **session id**, never to the slug alone.
+
+## Path segment or query parameter?
+
+You described a "UTM parameter". UTM parameters are for marketing attribution (`utm_source`, `utm_campaign`), and a slug is an identity, so I would keep them separate. Real UTM values can still be captured and stored on the session for attribution.
+
+| | Path (`/demo/acme-corp/rep`) | Query (`?org=acme-corp`) |
+|---|---|---|
+| Server lookup | Available in layouts and pages as a route param | Only in pages, and layouts cannot read it |
+| Survives navigation | Yes, part of every link | Every link, redirect and role switch must carry it, and it is easy to drop |
+| Shareable and readable | Clean | Fine |
+| Fits the current routes | Yes: `app/demo/[org]/rep` and so on | Least code change |
+
+Recommendation: path. If you prefer the query form, everything below still applies.
+
+## When to generate the slug
+
+Two entry paths, both producing the same record:
+
+1. **Self-serve (the main flow).** The visitor submits the email gate with a domain. Step one of the prepare-session workflow normalizes the domain and creates or finds the organization and its slug. The scrape runs afterwards, so the slug exists immediately and the URL is stable while enrichment continues.
+2. **Pre-provisioned (optional).** You or outreach create the organization ahead of time for a target account and send them `/demo/acme-corp`. The scrape is already done, so the demo starts instantly. This falls out for free if the slug is just a database key.
+
+Test domain: use a fixed slug, for example `demo-co`, with its profile pre-cached so the fallback is instant.
+
+## How to generate it
+
+1. **Normalize the domain.** Lowercase, strip the protocol, `www.`, port, path and query. Reduce to the registrable domain, so `app.acme.com/blog` becomes `acme.com` and `shop.acme.co.uk` becomes `acme.co.uk`. Use a public-suffix-aware library for this (`tldts` is one option). Do not split on dots by hand.
+2. **Derive the slug** from the name part of the domain: `acme-corp.com` becomes `acme-corp`. Lowercase letters, digits and hyphens only. No leading or trailing hyphen. Cap the length.
+3. **Make it idempotent.** The domain is the unique key. The same domain always maps to the same slug, so use upsert on the domain.
+4. **Handle collisions.** `acme.com` and `acme.io` both want `acme`. First one keeps it. Later ones get the TLD appended (`acme-io`), then a short suffix as a last resort. Enforce a unique constraint on both slug and domain.
+5. **Reserve words** that would clash with routes or look official: `demo`, `api`, `admin`, `rep`, `manager`, `prospect`, `www`, `login`, and similar.
+6. **Free email domains** (gmail.com and similar) must never become an organization. If the visitor gives only a free email and no company domain, fall back to the test domain.
+7. **Non-ASCII domains:** store the punycode form as the domain and decide separately how the slug is displayed.
+
+## The privacy point that needs a decision
+
+The slug is guessable. Anyone can type `/demo/acme-corp/...`. So the slug must not be what unlocks private data.
+
+- **Organization record (readable by slug):** name, logo, public scrape, extracted business profile. This is public information, and sharing it between two visitors from the same company is fine and even useful, since the second one gets an instant scrape.
+- **Session record (private):** visitor email, consent, enrichment of the person, intake transcript, call transcript, feedback. Keyed by an unguessable session id held in a cookie or a long random token in the link.
+- **"Previous chats"** should therefore be retrieved by **session**, not by slug. Two employees of Acme must not see each other's conversations.
+- The slug is not proof of ownership. Anyone can enter any domain. That is acceptable for public data. If it ever matters, verify that the visitor's email domain matches.
+
+## Suggested Supabase tables
+
+- **organizations:** id, slug (unique), domain (unique), display name, logo path, extracted profile (JSON), scrape status (pending, ready, failed), scraped at, created at.
+- **demo_sessions:** id, organization id, visitor email, consent flag and timestamp, UTM values, status, created at.
+- **Child tables** linked to the session: intake, calls and transcripts, feedback.
+- **Storage bucket** for logos (public read) and, if kept, recordings (private).
+- **Access:** turn on row-level security with deny-by-default. Do all reads and writes on the server (route handlers, server components and the workflows) with the service key. Never expose that key to the browser.
+
+## How to retrieve, per request
+
+1. A request comes in for `/demo/acme-corp/rep`.
+2. The `[org]` layout looks up the organization by slug on the server.
+3. **Not found:** send the visitor to the email gate, or show a not-found page. Decide which.
+4. **Found but scrape pending:** show a waiting state. A status column plus polling is the simplest. Supabase Realtime is an option later.
+5. **Found and ready:** pass name, logo and profile to the shell. The sidebar header and banner can show the company instead of "Your Operator", and the page title can use it.
+6. Session data is loaded separately from the session cookie, never from the slug.
+7. Use the framework's caching guidance from the bundled docs for the organization lookup, since the public profile changes rarely. Do not assume the older caching behavior.
+
+## Changes to the plan and the build
+
+- **Workflow 1 gains a first step:** normalize the domain and upsert the organization and slug, before the scrape.
+- **Routes move** from `app/demo/rep` to `app/demo/[org]/rep`, and likewise for manager and prospect. `/demo` with no slug stays as the entry point.
+- **Hardcoded role links must carry the slug.** Today the role hrefs in the roles file are fixed strings, the banner links, the sidebar navigation and the header's active-route check all assume `/demo/<role>`. All of these need the slug added.
+- **After the gate:** redirect from `/demo` to `/demo/<slug>/prospect`.
+- **Branding:** the shell can show the company's name and logo from the organization record.
+
+## Open questions
+
+1. Path segment or query parameter? I recommend the path.
+2. If a slug is not found, should the visitor go back to the email gate or see a not-found page?
+3. Should a shared or outreach link (`/demo/acme-corp`) skip the domain field and only ask for email?
+4. Do you want the pre-provisioned path (creating organizations ahead of time for target accounts) in scope for the first version?
+5. Should the visitor's email domain have to match the entered company domain, or is any domain acceptable?
+6. What is the retention policy for scraped and enriched data, and for transcripts?
+7. What is the test domain, and what is its fixed slug?

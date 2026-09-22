@@ -9,7 +9,7 @@ export default function WebHeader() {
           youroperator.ai
         </span>
         <div className="flex flex-row items-center gap-2">
-          <CtaButtonBook />
+          {/* <CtaButtonBook /> */}
           <ThemeButton />
         </div>
       </div>
