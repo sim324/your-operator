@@ -1,11 +1,17 @@
 "use client";
 
 import { useTransition } from "react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 import { clearLeadCompanyCookie } from "@/lib/intake/actions";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { DEMO_ROLES } from "./roles";
 
@@ -20,6 +26,13 @@ export default function RoleSwitcherBanner({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
+  const currentRole = DEMO_ROLES.find((role) => role.href === pathname);
+
+  function handleRoleChange(slug: string) {
+    const role = DEMO_ROLES.find((r) => r.slug === slug);
+    if (role) router.push(role.href);
+  }
+
   function handleStartOver() {
     startTransition(async () => {
       await clearLeadCompanyCookie();
@@ -28,37 +41,34 @@ export default function RoleSwitcherBanner({
   }
 
   return (
-    <div className="flex w-full h-11 items-center justify-start gap-2 border-b px-4 bg-muted">
-      <span className="text-muted-foreground text-sm">Viewing as:</span>
-      <div className="flex items-center">
-        {DEMO_ROLES.map((role) => {
-          const isActive = pathname === role.href;
-          return (
-            <Button
-              key={role.slug}
-              asChild
-              size="sm"
-              variant={isActive ? "outline" : "ghost"}
-            >
-              <Link
-                href={role.href}
-                aria-current={isActive ? "page" : undefined}
-              >
-                {role.label}
-              </Link>
-            </Button>
-          );
-        })}
-      </div>
+    <div className="flex w-full h-11 items-center gap-2 border-b px-4 bg-muted">
+      <span className="shrink-0 text-sm text-muted-foreground">
+        Viewing as:
+      </span>
+
+      <Select value={currentRole?.slug} onValueChange={handleRoleChange}>
+        <SelectTrigger size="sm">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {DEMO_ROLES.map((role) => (
+            <SelectItem key={role.slug} value={role.slug}>
+              {role.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {companyName && (
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            Company:{" "}
-            <span className="font-medium text-foreground">{companyName}</span>
+        <div className="ml-auto flex min-w-0 items-center gap-2">
+          <span className="hidden shrink-0 text-sm text-muted-foreground sm:inline">
+            Company:
+          </span>
+          <span className="min-w-0 max-w-32 truncate text-sm font-medium sm:max-w-48">
+            {companyName}
           </span>
           <Button
-            size="sm"
+            size="default"
             variant="destructive"
             disabled={isPending}
             onClick={handleStartOver}
