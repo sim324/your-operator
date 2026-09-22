@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { start } from "workflow/api";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type {
@@ -8,6 +9,7 @@ import type {
   LeadCompanySource,
   LeadCompanyStatus,
 } from "@/lib/supabase/models";
+import { enrichCompanyWorkflow } from "@/workflows/enrich-company";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LEAD_COMPANY_COOKIE = "demo_lead_company_id";
@@ -63,9 +65,17 @@ const SOURCE_MANUAL: LeadCompanySource = "manual";
 const STATUS_ENRICHED: LeadCompanyStatus = "enriched";
 const STATUS_PENDING: LeadCompanyStatus = "pending";
 
+interface ResolvedCompany {
+  companyId: string;
+  // Set only when a brand-new row was just created for a real domain, so the
+  // caller can kick off enrichment. Reused rows and the no-website/sample
+  // paths leave this null (already enriched, or nothing to scrape).
+  enrichDomain: string | null;
+}
+
 async function resolveCompanyId(
   input: SubmitIntakeInput,
-): Promise<{ companyId: string } | { error: string }> {
+): Promise<ResolvedCompany | { error: string }> {
   const supabase = getSupabaseServerClient();
 
   if (input.useSampleData) {
@@ -84,7 +94,7 @@ async function resolveCompanyId(
       .single();
 
     if (error || !data) return { error: "Could not create sample company." };
-    return { companyId: data.id };
+    return { companyId: data.id, enrichDomain: null };
   }
 
   const domain = input.domain ? normalizeDomain(input.domain) : null;
@@ -102,7 +112,7 @@ async function resolveCompanyId(
       .eq("domain", domain)
       .maybeSingle();
 
-    if (existing) return { companyId: existing.id };
+    if (existing) return { companyId: existing.id, enrichDomain: null };
   }
 
   const { data, error } = await supabase
@@ -118,7 +128,7 @@ async function resolveCompanyId(
     .single();
 
   if (error || !data) return { error: "Could not save company." };
-  return { companyId: data.id };
+  return { companyId: data.id, enrichDomain: domain };
 }
 
 async function upsertContact(email: string, companyId: string) {
@@ -167,6 +177,13 @@ export async function submitIntake(
   const contactResult = await upsertContact(email, companyResult.companyId);
   if ("error" in contactResult) {
     return { ok: false, error: contactResult.error };
+  }
+
+  if (companyResult.enrichDomain) {
+    await start(enrichCompanyWorkflow, [
+      companyResult.companyId,
+      companyResult.enrichDomain,
+    ]);
   }
 
   const cookieStore = await cookies();
