@@ -50,7 +50,7 @@ export default function RoleSwitcherBanner({
         <SelectTrigger size="sm">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper">
           {DEMO_ROLES.map((role) => (
             <SelectItem key={role.slug} value={role.slug}>
               {role.label}

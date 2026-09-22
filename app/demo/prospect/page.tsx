@@ -59,6 +59,7 @@ export default async function DemoProspectPage() {
           {agentId && (
             <ElevenLabsWidget
               agentId={agentId}
+              companyId={company.id}
               avatarImageUrl={company.logo_url ?? undefined}
               dynamicVariables={
                 enrichment
