@@ -1,4 +1,5 @@
 import {
+  checkEmbeddableStep,
   markFailedStep,
   saveEnrichmentStep,
   scrapeCompanyStep,
@@ -12,7 +13,12 @@ export async function enrichCompanyWorkflow(companyId: string, domain: string) {
 
   try {
     await updateStatusStep(companyId, "scraping");
-    const scraped = await scrapeCompanyStep(domain);
+    // Only needs the domain, so run it alongside scraping via Promise.all
+    // rather than making it its own status/wait.
+    const [scraped, embeddable] = await Promise.all([
+      scrapeCompanyStep(domain),
+      checkEmbeddableStep(domain),
+    ]);
 
     await updateStatusStep(companyId, "structuring");
     const enrichment = await structureCompanyStep(scraped.markdown);
@@ -22,6 +28,7 @@ export async function enrichCompanyWorkflow(companyId: string, domain: string) {
 
     await saveEnrichmentStep(companyId, {
       logoUrl,
+      embeddable,
       enrichment,
     });
   } catch (err) {

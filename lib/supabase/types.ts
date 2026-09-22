@@ -45,6 +45,7 @@ export type Database = {
           created_at: string
           description: string | null
           domain: string | null
+          embeddable: boolean | null
           enrichment: Json
           id: string
           logo_url: string | null
@@ -58,6 +59,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           domain?: string | null
+          embeddable?: boolean | null
           enrichment?: Json
           id?: string
           logo_url?: string | null
@@ -71,6 +73,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           domain?: string | null
+          embeddable?: boolean | null
           enrichment?: Json
           id?: string
           logo_url?: string | null

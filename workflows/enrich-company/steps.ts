@@ -231,6 +231,41 @@ export async function uploadLogoStep(
   return null;
 }
 
+// Any X-Frame-Options value blocks a foreign origin (DENY/SAMEORIGIN/the
+// deprecated ALLOW-FROM all exclude us). A CSP frame-ancestors directive
+// does the same unless it explicitly allows '*' - a real site won't list our
+// arbitrary demo origin by name.
+function isEmbeddable(headers: Headers): boolean {
+  if (headers.get("x-frame-options")) return false;
+
+  const csp = headers.get("content-security-policy");
+  const frameAncestors = csp
+    ?.split(";")
+    .map((directive) => directive.trim())
+    .find((directive) => directive.toLowerCase().startsWith("frame-ancestors"));
+
+  if (frameAncestors && !frameAncestors.includes("*")) return false;
+
+  return true;
+}
+
+export async function checkEmbeddableStep(domain: string): Promise<boolean> {
+  "use step";
+
+  try {
+    const response = await fetch(`https://${domain}`, {
+      method: "HEAD",
+      redirect: "follow",
+      signal: AbortSignal.timeout(8000),
+    });
+    return isEmbeddable(response.headers);
+  } catch {
+    // Couldn't reach it to check - don't block enrichment over this. Worst
+    // case the iframe just renders blank, same as never having checked.
+    return true;
+  }
+}
+
 export async function updateStatusStep(
   companyId: string,
   status: LeadCompanyStatus,
@@ -245,6 +280,7 @@ export async function saveEnrichmentStep(
   companyId: string,
   result: {
     logoUrl: string | null;
+    embeddable: boolean;
     enrichment: CompanyInfo;
   },
 ) {
@@ -255,6 +291,7 @@ export async function saveEnrichmentStep(
     .from("lead_companies")
     .update({
       logo_url: result.logoUrl,
+      embeddable: result.embeddable,
       enrichment: result.enrichment,
       status: STATUS_ENRICHED,
       source: SOURCE_FIRECRAWL,
