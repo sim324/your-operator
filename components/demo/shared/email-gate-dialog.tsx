@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -90,8 +90,9 @@ export default function EmailGateDialog({
   // A returning visitor we already know (via cookie) doesn't need the gate
   // to pop open on every page load - the role-switcher banner shows their
   // company persistently instead. Only a brand-new visitor gets gated.
-  const alreadyKnown = initialCompanyId !== null || initialValidated;
-  const [open, setOpen] = useState(!alreadyKnown);
+  const initiallyKnown = initialCompanyId !== null || initialValidated;
+  const wasKnownRef = useRef(initiallyKnown);
+  const [open, setOpen] = useState(!initiallyKnown);
   const [validated, setValidated] = useState(initialValidated);
   const [companyId, setCompanyId] = useState<string | null>(initialCompanyId);
   const [isPending, startTransition] = useTransition();
@@ -107,6 +108,25 @@ export default function EmailGateDialog({
       useSampleData: false,
     },
   });
+
+  useEffect(() => {
+    const nowKnown = initialCompanyId !== null || initialValidated;
+    // React only to an external reset (known -> unknown) - the banner's
+    // Start over clearing the cookie. The opposite transition (unknown ->
+    // known) also happens right after a *fresh* submission reuses an
+    // existing company, since submitIntake's cookie write triggers Next's
+    // automatic revalidation of these same server-derived props; that case
+    // is already handled directly by the submit handler's own setCompanyId
+    // call, so resetting here too would just wipe it out and pop the
+    // dialog closed the moment it opens.
+    if (wasKnownRef.current && !nowKnown) {
+      setCompanyId(null);
+      setValidated(false);
+      setOpen(true);
+      form.reset();
+    }
+    wasKnownRef.current = nowKnown;
+  }, [initialCompanyId, initialValidated, form]);
 
   const noWebsite = useWatch({ control: form.control, name: "noWebsite" });
   const useSampleData = useWatch({

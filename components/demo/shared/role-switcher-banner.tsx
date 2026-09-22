@@ -54,11 +54,12 @@ export default function RoleSwitcherBanner({
       {companyName && (
         <div className="ml-auto flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            Company: <span className="font-medium text-foreground">{companyName}</span>
+            Company:{" "}
+            <span className="font-medium text-foreground">{companyName}</span>
           </span>
           <Button
             size="sm"
-            variant="ghost"
+            variant="destructive"
             disabled={isPending}
             onClick={handleStartOver}
           >
