@@ -1,0 +1,36 @@
+Tracking/analytics codes found on https://denverdreamdentistry.com/ (homepage)
+
+Two separate Google Tag Manager containers are loaded (both fire on every page load,
+via the standard head snippet + body noscript iframe):
+
+1. GTM-MKSB4SJ8
+   - Google Ads: AW-17094278456
+   - GA4: G-TTWGPDEEBJ
+   - Phone conversion tracking configured (dynamic call tracking for Google Ads)
+
+2. GTM-TKR2SCV2
+   - GA4: G-DSY5CNQZNX
+   - Universal Analytics (legacy, deprecated by Google in 2023-2024): UA-260280036-1
+   - Meta/Facebook Pixel: 541145487093553
+   - Phone conversion tracking also configured here
+
+Other third-party scripts loaded on the homepage (not analytics, but worth noting):
+- Google Maps JavaScript API, with the API key exposed client-side in the script URL
+  (maps.googleapis.com/maps/api/js?key=AIzaSyBPfD7QCipnUCVuvsNRu4JI4I-ghXct314)
+- static.elfsight.com/platform/platform.js - Elfsight widget (likely the reviews
+  widget on /reviews/, which explains why that page has no review/rating schema of
+  its own -- the reviews are rendered by a third-party embed instead)
+- website-widgets.pages.dev/dist/sienna.min.js - "Sienna" accessibility overlay widget
+
+Findings worth flagging:
+- Two GTM containers + two separate GA4 properties (G-TTWGPDEEBJ and G-DSY5CNQZNX) is
+  unusual -- normally a site runs one GTM container. This could be leftover from an
+  agency handoff/migration, or duplicate/parallel tracking that's splitting or
+  double-counting traffic data.
+- A live Universal Analytics property (UA-260280036-1) is still wired up. UA stopped
+  processing data in mid-2024, so this tag is dead weight -- it fires but nothing
+  reads it.
+- The Google Maps API key is exposed in a plain client-side URL. This is normal for
+  the Maps JavaScript API (it's designed to be public) but it should be
+  HTTP-referrer-restricted in Google Cloud Console to denverdreamdentistry.com only --
+  worth a quick check, not something we can verify from outside.

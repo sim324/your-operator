@@ -1,0 +1,91 @@
+
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://denverdreamdentistry.com/invisalign-denver#service",
+      "name": "Invisalign in Denver, CO",
+      "url": "https://denverdreamdentistry.com/invisalign-denver",
+      "description": "Get a straighter smile with Invisalign in Denver, CO. Virtually invisible clear aligners designed for comfort, convenience, and effective teeth straightening.",
+      "serviceType": "Invisalign",
+      "provider": {
+        "@id": "https://denverdreamdentistry.com/#dentist"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Denver"
+      },
+      "availableChannel": {
+        "@type": "ServiceChannel",
+        "serviceLocation": {
+          "@type": "Place",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "820 Clermont St #310",
+            "addressLocality": "Denver",
+            "addressRegion": "CO",
+            "postalCode": "80220",
+            "addressCountry": "US"
+          }
+        }
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://denverdreamdentistry.com/invisalign-denver#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does Invisalign work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Invisalign uses custom-made clear aligners that gradually shift your teeth into position. You switch to a new set every 1–2 weeks."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Invisalign painful?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Most patients experience only mild pressure for a day or two when switching to a new aligner tray."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does Invisalign treatment take?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Treatment ranges from 6–18 months depending on your alignment needs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I eat and drink with Invisalign?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You must remove aligners before eating or drinking anything other than water. This keeps them clean and damage-free."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How often should I wear Invisalign aligners?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For best results, wear them 20–22 hours per day."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Invisalign more expensive than braces?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Costs vary based on your case, but Invisalign is often comparable to traditional braces. Flexible financing is available."
+          }
+        }
+      ]
+    }
+  ]
+}
+
+---

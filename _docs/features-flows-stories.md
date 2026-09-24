@@ -82,6 +82,7 @@ Suggested hierarchy: Feature > Flow > Stories. Nine features cover the whole tra
 - **F7b. Reviews and reputation:** how reviews are doing across the internet. Recommend to a rep that they request a review from a specific client, with an email template.
   - As a manager, I want review performance in one place.
   - As a rep, I want to be told who to ask for a review, with a template ready to send.
+  - Status: the manager side is built for Google reviews, see Update 4 at the end of this file.
 
 ### F8. Client portal
 - **Flow:** the client sees videos, a to-do list of action items (with a bingo card), payment reminders and meeting notes. They can add their own notes, and leave a review as text or a recorded video that is stored and triggers a notification.
@@ -102,6 +103,10 @@ Suggested hierarchy: Feature > Flow > Stories. Nine features cover the whole tra
 - White-label client portal for the customer's own business.
 - LMS, group coaching, journaling and gamified training for the customer's customers (Wave 9 style), with feature flags.
 - Game authoring tools.
+- **Minimal AEO/GEO + SEO site audit tool**, a lightweight version of Semrush's site audit / AI-visibility features. Two halves:
+  - **Technical audit:** fetch a domain's `robots.txt`, sitemap(s), `llms.txt` (usually missing), meta/OG/canonical tags, JSON-LD structured data, link-health (status codes across sitemap URLs), and whether the site's WAF blocks known AI-crawler user agents (GPTBot, ClaudeBot, PerplexityBot, etc.). All doable with plain HTTP requests, no crawling infra needed for a single-site check.
+  - **AEO/GEO answer testing:** pick real questions in the customer's niche (from Google "People Also Ask", GBP Q&A, review text, Reddit), then run those queries against Google AI Overviews (via SERP scrape, e.g. SerpApi/DataForSEO), Perplexity (has a real API with citations), and ChatGPT (OpenAI API with `web_search` tool, also returns citations) to see whether and how the customer's site gets surfaced or cited.
+  - Explored hands-on against `denverdreamdentistry.com` as a real test case; findings and raw fetched files are in `_docs/denver-dream-dentistry/` (robots.txt, sitemap + sub-sitemaps, meta tags, structured data, link-status check, bot-UA check, tracking-code audit). Could become a real feature (a report we generate for prospects) or stay an internal sales/audit tool.
 
 ## The demo script (the flow of flows)
 
@@ -424,3 +429,35 @@ The slug is guessable. Anyone can type `/demo/acme-corp/...`. So the slug must n
 5. Should the visitor's email domain have to match the entered company domain, or is any domain acceptable?
 6. What is the retention policy for scraped and enriched data, and for transcripts?
 7. What is the test domain, and what is its fixed slug?
+
+---
+
+# Update 4: F7b reviews on the leader page (built, not yet tested end to end)
+
+A cut-down version of the Clicklease reputation scraper (`reputation-dashboard-backend`), rebuilt for any demo company rather than one hardcoded one. It covers Google only, and every step starts from a button click on the leader page: nothing runs automatically, and none of it touches the intake dialog.
+
+## What is built
+
+| Step | Button | What it does | Stored |
+|---|---|---|---|
+| 1. Find the Google listing | "Find Google reviews" | Scrapes the company's site for a Maps link or cid, then matches it with a Google Places text search. A result is only accepted if its website or cid matches. | `google_place_id` and `google_maps_url` on `lead_companies`. Places rating and reviews are **not** stored (Google's terms), they are fetched fresh and cached for an hour. |
+| 1b. No website | Website input | For companies added without a domain: saves the domain, then runs step 1. | `lead_companies.domain` |
+| 2. Pull review history | "Pull review history" | Apify `compass~google-maps-reviews-scraper`, newest first, capped at 1,000 reviews and $2 per run. | `lead_reviews` |
+| 3. Find themes | "Find themes" | Claude Sonnet 5 proposes 5–10 themes for this business (high effort), then tags every written review with zero or more of them (low effort, batches of 50). Topics only, no sentiment: the star rating covers that. Not editable. | `review_themes`, `review_theme_tags` |
+
+Leader page layout: the Google Places card on the left; the metrics card and a monthly review-volume line chart on the right; the themes card full width below.
+
+Reference: Places API response shapes are in `_docs/denver-dream-dentistry/google-places-api.md`.
+
+## Follow-up ideas
+
+- **Refresh the review history.** Once a pull succeeds there is no way to pull again. Add a "Refresh" action that re-runs the Apify pull; the upsert on `(company_id, source, external_id)` already makes that safe.
+- **Themes over time.** Tags are stored against dated reviews, so a per-theme line (mentions per month) is a query plus a chart, with no new data needed.
+- **Re-theme after a refresh.** New reviews pulled after classification have no tags. Either tag only the new reviews against the existing themes, or allow re-running discovery.
+- **Enrichment for companies that add a website later.** The leader page website form only saves the domain and finds the Google listing. It does not re-run company enrichment, so name, description and logo stay as entered. Decide whether it should.
+- **Review history for the sample company.** Acme Robotics shows fake Places reviews but no metrics, chart or themes. Seed sample history if the sample path needs to demo the whole section.
+
+## Deferred
+
+- **"Who should the rep ask for a review"** (F7b rep story). Needs a list of clients we do not have; it would be seeded data either way. Removed from this build.
+- **Other review sources** (Yelp, Facebook, etc.). Google only for now.

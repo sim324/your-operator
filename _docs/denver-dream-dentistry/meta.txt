@@ -1,0 +1,23 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+<title>Denver Dentist &#8212; Denver Dream Dentistry &#8212; Denver, CO</title>
+<meta name="description" content="Looking for a dentist in Denver, CO? Denver Dream Dentistry offers comfortable general and cosmetic dentistry. Call: 303-377-9278" />
+<link rel="canonical" href="https://denverdreamdentistry.com/" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Denver Dentist &#8212; Denver Dream Dentistry &#8212; Denver, CO" />
+<meta property="og:description" content="Looking for a dentist in Denver, CO? Denver Dream Dentistry offers comfortable general and cosmetic dentistry. Call: 303-377-9278" />
+<meta property="og:url" content="https://denverdreamdentistry.com/" />
+<meta property="og:site_name" content="Denver Dream Dentistry" />
+<meta property="article:modified_time" content="2026-07-04T16:28:49+00:00" />
+<meta property="og:image" content="https://denverdreamdentistry.com/wp-content/uploads/2020/02/denverdreamdentistry-icon.png" />
+<meta property="og:image:width" content="548" />
+<meta property="og:image:height" content="548" />
+<meta property="og:image:type" content="image/png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="google-site-verification" content="BLBXkJVxJY0WxO2MNZr4Xfvk44M7XLI-P-HvPhe6A_k" />
+<meta name="generator" content="WordPress 7.1.2" />
+<meta name="google-site-verification" content="t60qMReKZqfHsSYxLU9tLS9aRbn92FMikvQhLO15wOU" />
+<meta name="generator" content="Elementor 4.2.4; settings: css_print_method-external, google_font-enabled, font_display-auto">
+<meta name="msapplication-TileImage" content="https://denverdreamdentistry.com/wp-content/uploads/2020/02/denverdreamdentistry-icon-300x300.png" />

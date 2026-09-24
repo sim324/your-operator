@@ -1,0 +1,153 @@
+
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Dentist",
+      "@id": "https://denverdreamdentistry.com/#dentist",
+      "name": "Denver Dream Dentistry",
+      "image": "https://denverdreamdentistry.com/wp-content/uploads/2020/02/Denver_Dream_Dentistry_Primary_Logo_Color.png",
+      "url": "https://denverdreamdentistry.com/",
+      "telephone": "+1-303-377-9278",
+      "priceRange": "$$",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "120"
+      },
+      "sameAs": [
+        "https://denverdreamdentistry.com/reviews/",
+        "https://www.google.com/maps?ll=39.729868,-104.934827&amp;z=13&amp;t=m&amp;hl=en&amp;gl=US&amp;mapclient=embed&amp;cid=12086540521919165540"
+      ],
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "820 Clermont St #310",
+        "addressLocality": "Denver",
+        "addressRegion": "CO",
+        "postalCode": "80220",
+        "addressCountry": "US"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 39.729868,
+        "longitude": -104.934827
+      },
+      "hasMap": "https://www.google.com/maps?ll=39.729868,-104.934827&amp;z=13&amp;t=m&amp;hl=en&amp;gl=US&amp;mapclient=embed&amp;cid=12086540521919165540",
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "Monday",
+          "opens": "10:00",
+          "closes": "19:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "Tuesday",
+          "opens": "08:00",
+          "closes": "19:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "Wednesday",
+          "opens": "08:00",
+          "closes": "19:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "Thursday",
+          "opens": "08:00",
+          "closes": "16:00"
+        }
+      ],
+      "areaServed": {
+        "@type": "City",
+        "name": "Denver"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "https://denverdreamdentistry.com/dental-implants-denver#service",
+      "name": "Dental Implants Denver",
+      "url": "https://denverdreamdentistry.com/dental-implants-denver",
+      "description": "Restore your smile with Dental Implants in Denver. We provide durable, natural-looking tooth replacement using advanced dental implant technology for lasting comfort and aesthetics.",
+      "serviceType": "Dental Implants",
+      "provider": {
+        "@id": "https://denverdreamdentistry.com/#dentist"
+      },
+      "areaServed": {
+        "@type": "City",
+        "name": "Denver"
+      },
+      "availableChannel": {
+        "@type": "ServiceChannel",
+        "serviceLocation": {
+          "@type": "Place",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "820 Clermont St #310",
+            "addressLocality": "Denver",
+            "addressRegion": "CO",
+            "postalCode": "80220",
+            "addressCountry": "US"
+          }
+        }
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://denverdreamdentistry.com/dental-implants-denver#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Are dental implants painful?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The procedure is done under local anesthesia, and most patients feel minimal discomfort. Mild soreness afterward can be easily managed with medication."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does the dental implant process take?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Typically 3–6 months from placement to final crown, depending on healing time."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I eat normally with dental implants?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes — once healed, you can enjoy all your favorite foods without worry."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much do dental implants cost in Denver?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Costs depend on your case, but we offer flexible financing and detailed quotes after your exam."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are implants covered by insurance?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Some dental plans cover parts of the procedure; our staff helps verify and submit claims."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What if I have bone loss or gum issues?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Bone grafting or gum therapy can often prepare your mouth for successful implant placement."
+          }
+        }
+      ]
+    }
+  ]
+}
+
+---

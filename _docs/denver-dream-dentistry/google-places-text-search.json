@@ -1,0 +1,14 @@
+{
+  "places": [
+    {
+      "id": "ChIJR1F9Jxx8bIcRZDRbRJEEvKc",
+      "formattedAddress": "820 Clermont St #310, Denver, CO 80220, USA",
+      "googleMapsUri": "https://maps.google.com/?cid=12086540521919165540&g_mp=Cidnb29nbGUubWFwcy5wbGFjZXMudjEuUGxhY2VzLlNlYXJjaFRleHQQAhgEIAA",
+      "websiteUri": "https://denverdreamdentistry.com/",
+      "displayName": {
+        "text": "Denver Dream Dentistry",
+        "languageCode": "en"
+      }
+    }
+  ]
+}

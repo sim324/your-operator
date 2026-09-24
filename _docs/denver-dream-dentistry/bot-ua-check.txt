@@ -1,0 +1,14 @@
+no-UA(curl-default)    homepage:403 robots.txt:403
+GPTBot                 homepage:200 robots.txt:200
+ChatGPT-User           homepage:200 robots.txt:200
+ClaudeBot              homepage:200 robots.txt:200
+Claude-User            homepage:200 robots.txt:200
+PerplexityBot          homepage:429 robots.txt:200
+Perplexity-User        homepage:200 robots.txt:200
+Google-Extended        homepage:200 robots.txt:200
+Googlebot              homepage:200 robots.txt:200
+Bingbot                homepage:200 robots.txt:200
+CCBot                  homepage:200 robots.txt:200
+Amazonbot              homepage:429 robots.txt:200
+Applebot-Extended      homepage:200 robots.txt:200
+Meta-ExternalAgent     homepage:200 robots.txt:200

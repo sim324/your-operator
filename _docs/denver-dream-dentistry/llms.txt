@@ -1,0 +1,1 @@
+no llms.txt (redirects to homepage, i.e. 404)
