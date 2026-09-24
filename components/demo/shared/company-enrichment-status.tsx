@@ -33,11 +33,15 @@ interface CompanyEnrichment {
 interface CompanyEnrichmentStatusProps {
   companyId: string;
   onUseSampleDataInstead: () => void;
+  // Called with the company's status whenever it loads or changes, so the
+  // dialog can hold "Continue to demo" until enrichment is done.
+  onStatusChange?: (status: LeadCompanyStatus) => void;
 }
 
 export default function CompanyEnrichmentStatus({
   companyId,
   onUseSampleDataInstead,
+  onStatusChange,
 }: CompanyEnrichmentStatusProps) {
   const [company, setCompany] = useState<LeadCompanyRow | null>(null);
 
@@ -51,7 +55,10 @@ export default function CompanyEnrichmentStatus({
       .eq("id", companyId)
       .single()
       .then(({ data }) => {
-        if (!cancelled && data) setCompany(data);
+        if (!cancelled && data) {
+          setCompany(data);
+          onStatusChange?.(data.status as LeadCompanyStatus);
+        }
       });
 
     const channel = supabase
@@ -65,8 +72,10 @@ export default function CompanyEnrichmentStatus({
           filter: `id=eq.${companyId}`,
         },
         (payload) => {
-          setCompany(payload.new as LeadCompanyRow);
-        }
+          const row = payload.new as LeadCompanyRow;
+          setCompany(row);
+          onStatusChange?.(row.status as LeadCompanyStatus);
+        },
       )
       .subscribe();
 
@@ -74,7 +83,7 @@ export default function CompanyEnrichmentStatus({
       cancelled = true;
       supabase.removeChannel(channel);
     };
-  }, [companyId]);
+  }, [companyId, onStatusChange]);
 
   const status = company?.status as LeadCompanyStatus | undefined;
   const currentIndex = STATUS_ORDER.indexOf(status ?? "pending");

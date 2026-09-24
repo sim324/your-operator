@@ -29,6 +29,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import type { LeadCompanyStatus } from "@/lib/supabase/models";
 import { Textarea } from "@/components/ui/textarea";
 
 const intakeFormSchema = z
@@ -94,6 +95,9 @@ export default function EmailGateDialog({
   const [open, setOpen] = useState(!initiallyKnown);
   const [validated, setValidated] = useState(initialValidated);
   const [companyId, setCompanyId] = useState<string | null>(initialCompanyId);
+  // Reported by CompanyEnrichmentStatus; null until it has loaded.
+  const [enrichmentStatus, setEnrichmentStatus] =
+    useState<LeadCompanyStatus | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<IntakeFormValues>({
@@ -120,6 +124,7 @@ export default function EmailGateDialog({
     // dialog closed the moment it opens.
     if (wasKnownRef.current && !nowKnown) {
       setCompanyId(null);
+      setEnrichmentStatus(null);
       setValidated(false);
       setOpen(true);
       form.reset();
@@ -169,7 +174,10 @@ export default function EmailGateDialog({
         email: form.getValues("email"),
         useSampleData: true,
       });
-      if (result.ok) setCompanyId(result.companyId ?? null);
+      if (result.ok) {
+        setEnrichmentStatus(null);
+        setCompanyId(result.companyId ?? null);
+      }
     });
   }
 
@@ -182,12 +190,19 @@ export default function EmailGateDialog({
     startTransition(async () => {
       await clearLeadCompanyCookie();
       setCompanyId(null);
+      setEnrichmentStatus(null);
       setValidated(false);
       form.reset();
     });
   }
 
   const submitted = validated || companyId !== null;
+  // A company is being enriched until it lands on enriched or failed. The
+  // no-website path has no company here, so it can continue right away.
+  const isEnriching =
+    companyId !== null &&
+    enrichmentStatus !== "enriched" &&
+    enrichmentStatus !== "failed";
 
   return (
     <Dialog
@@ -218,6 +233,7 @@ export default function EmailGateDialog({
           <CompanyEnrichmentStatus
             companyId={companyId}
             onUseSampleDataInstead={handleUseSampleDataInstead}
+            onStatusChange={setEnrichmentStatus}
           />
         ) : validated ? (
           <p className="text-sm text-muted-foreground">
@@ -374,7 +390,12 @@ export default function EmailGateDialog({
             >
               Start over
             </Button>
-            <Button onClick={handleContinueToDemo}>Continue to demo</Button>
+            <Button
+              onClick={handleContinueToDemo}
+              disabled={isEnriching || isPending}
+            >
+              Continue to demo
+            </Button>
           </DialogFooter>
         )}
       </DialogContent>

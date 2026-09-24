@@ -33,8 +33,10 @@ const SOURCE_SAMPLE: LeadCompanySource = "sample";
 // side keeps cards' ring and shadow from being clipped by the scroll, and
 // children don't shrink: Card is overflow-hidden, which would otherwise let
 // it squash to the column's height and clip itself instead of scrolling.
+// Overscroll is off vertically only: turning it off sideways too would trap
+// horizontal scrolls in the column instead of passing them to the row.
 const COLUMN =
-  "flex flex-col gap-6 lg:w-[32rem] lg:shrink-0 lg:snap-start lg:overflow-y-auto lg:overscroll-none lg:p-1 lg:pb-2 lg:*:shrink-0";
+  "flex flex-col gap-6 lg:w-[32rem] lg:shrink-0 lg:snap-start lg:overflow-y-auto lg:overscroll-y-none lg:p-1 lg:pb-2 lg:*:shrink-0";
 
 async function ReviewsSection({ company }: { company: LeadCompanyRow }) {
   if (company.source === SOURCE_SAMPLE) {
