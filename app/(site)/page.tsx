@@ -45,7 +45,7 @@ export default function HomePage() {
               → Kyle is responsible for the performance of 70+ coaches.
             </p>
             <Quote
-              quote="...98, 99% aligned with exactly what I'd say."
+              quote="...98, 99% of the AI Coaching aligned with exactly what I'd say."
               by="Kyle, Head of Coaching"
             />
             <p className="text-xl text-pretty italic md:text-2xl pl-8 mb-8">
