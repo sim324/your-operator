@@ -53,3 +53,36 @@ export const REVIEW_THEME_CATEGORIES = [
   "other",
 ] as const;
 export type ReviewThemeCategory = (typeof REVIEW_THEME_CATEGORIES)[number];
+
+// supabase/migrations/20260926120000_ai_visibility.sql. Null = never run.
+export type AiVisibilityStatus = "generating" | "checking" | "ready" | "failed";
+
+// Keep in sync with the ai_visibility_queries.intent CHECK constraint.
+export const AI_VISIBILITY_INTENTS = [
+  "service_location",
+  "best_near_me",
+  "problem",
+  "comparison",
+] as const;
+export type AiVisibilityIntent = (typeof AI_VISIBILITY_INTENTS)[number];
+
+// lead_companies.ai_visibility_location: the web search tool's approximate
+// user location, so "near me" resolves to where the business is.
+export interface AiVisibilityLocation {
+  city: string;
+  region: string;
+  // ISO 3166-1 alpha-2, e.g. "US"
+  country: string;
+  // IANA, e.g. "America/Denver"
+  timezone: string;
+}
+
+export interface AiVisibilityBusiness {
+  name: string;
+  website: string | null;
+}
+
+export interface AiVisibilityCitation {
+  url: string;
+  title: string | null;
+}

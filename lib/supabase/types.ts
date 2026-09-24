@@ -39,8 +39,106 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_visibility_answers: {
+        Row: {
+          answer: string | null
+          attempt: number
+          businesses: Json | null
+          citations: Json
+          company_id: string
+          created_at: string
+          error: string | null
+          id: string
+          mentioned: boolean | null
+          model: string | null
+          query_id: string
+          rank: number | null
+        }
+        Insert: {
+          answer?: string | null
+          attempt: number
+          businesses?: Json | null
+          citations?: Json
+          company_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          mentioned?: boolean | null
+          model?: string | null
+          query_id: string
+          rank?: number | null
+        }
+        Update: {
+          answer?: string | null
+          attempt?: number
+          businesses?: Json | null
+          citations?: Json
+          company_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          mentioned?: boolean | null
+          model?: string | null
+          query_id?: string
+          rank?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_visibility_answers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "lead_companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_visibility_answers_query_id_fkey"
+            columns: ["query_id"]
+            isOneToOne: false
+            referencedRelation: "ai_visibility_queries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_visibility_queries: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          intent: string
+          position: number
+          query: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          intent: string
+          position?: number
+          query: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          intent?: string
+          position?: number
+          query?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_visibility_queries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "lead_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lead_companies: {
         Row: {
+          ai_visibility_location: Json | null
+          ai_visibility_status: string | null
+          ai_visibility_updated_at: string | null
           brand_color: string | null
           created_at: string
           description: string | null
@@ -63,6 +161,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_visibility_location?: Json | null
+          ai_visibility_status?: string | null
+          ai_visibility_updated_at?: string | null
           brand_color?: string | null
           created_at?: string
           description?: string | null
@@ -85,6 +186,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_visibility_location?: Json | null
+          ai_visibility_status?: string | null
+          ai_visibility_updated_at?: string | null
           brand_color?: string | null
           created_at?: string
           description?: string | null

@@ -8,6 +8,7 @@ import {
   LayoutDashboardIcon,
   LifeBuoyIcon,
   MessageSquareIcon,
+  RadarIcon,
   SendIcon,
   StarIcon,
   TrophyIcon,
@@ -52,6 +53,11 @@ const NAV_BY_ROLE: Record<DemoRole, NavItem[]> = {
     { title: "Game results", url: "#", icon: <TrophyIcon /> },
     { title: "Intake funnel", url: "#", icon: <FilterIcon /> },
     { title: "Reviews", url: "#", icon: <StarIcon /> },
+    {
+      title: "AI visibility",
+      url: "/demo/leader/ai-visibility",
+      icon: <RadarIcon />,
+    },
   ],
   prospect: [
     { title: "Intake", url: "/demo/prospect", icon: <MessageSquareIcon /> },
