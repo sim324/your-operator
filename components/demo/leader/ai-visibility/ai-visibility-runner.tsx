@@ -28,13 +28,24 @@ interface AiVisibilityRunnerProps {
   companyId: string;
   companyName: string;
   initialStatus: AiVisibilityStatus | null;
+  // In progress far longer than a run takes (cancelled or killed); the
+  // server will let it be started over.
+  isStale: boolean;
 }
 
 function copyFor(
   status: AiVisibilityStatus | null,
   isStarting: boolean,
+  isStuck: boolean,
   companyName: string,
 ) {
+  if (isStuck) {
+    return {
+      title: "This check looks stuck",
+      description:
+        "It's been running much longer than a check normally takes, so it was probably cancelled or interrupted. Start it over to get fresh results.",
+    };
+  }
   if (isStarting || status === "generating") {
     return {
       title: "Writing your customers' searches",
@@ -64,6 +75,7 @@ export default function AiVisibilityRunner({
   companyId,
   companyName,
   initialStatus,
+  isStale,
 }: AiVisibilityRunnerProps) {
   const router = useRouter();
   const [status, setStatus] = useState(initialStatus);
@@ -109,9 +121,12 @@ export default function AiVisibilityRunner({
     });
   }
 
-  const isWorking =
-    isStarting || status === "generating" || status === "checking";
-  const copy = copyFor(status, isStarting, companyName);
+  const inProgress = status === "generating" || status === "checking";
+  // Stale only applies to the status the page loaded with; any live update
+  // means the run is moving again.
+  const isStuck = isStale && inProgress && status === initialStatus && !isStarting;
+  const isWorking = isStarting || (inProgress && !isStuck);
+  const copy = copyFor(status, isStarting, isStuck, companyName);
 
   return (
     <Empty className="border">
@@ -149,7 +164,11 @@ export default function AiVisibilityRunner({
           ) : (
             <SparklesIcon data-icon="inline-start" />
           )}
-          {status === "failed" ? "Try again" : "Check AI visibility"}
+          {isStuck
+            ? "Start over"
+            : status === "failed"
+              ? "Try again"
+              : "Check AI visibility"}
         </Button>
         {error && <p className="text-sm text-destructive">{error}</p>}
       </EmptyContent>

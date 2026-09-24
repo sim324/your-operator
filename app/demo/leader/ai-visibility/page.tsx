@@ -7,7 +7,10 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { getAiVisibilityResults } from "@/lib/ai-visibility/results";
+import {
+  getAiVisibilityResults,
+  isRunStale,
+} from "@/lib/ai-visibility/results";
 import { getCurrentLeadCompany } from "@/lib/intake/current-company";
 import type {
   AiVisibilityLocation,
@@ -45,6 +48,7 @@ async function AiVisibilitySection({ company }: { company: LeadCompanyRow }) {
         companyId={company.id}
         companyName={companyName}
         initialStatus={status}
+        isStale={isRunStale(status, company.ai_visibility_updated_at)}
       />
     );
   }

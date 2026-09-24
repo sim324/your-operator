@@ -463,9 +463,9 @@ export async function setVisibilityStatusStep(
     .from("lead_companies")
     .update({
       ai_visibility_status: status,
-      ...(status === "ready"
-        ? { ai_visibility_updated_at: new Date().toISOString() }
-        : {}),
+      // When the status last changed: the "Checked" date once ready, and
+      // how the page tells a stuck run from a slow one before that.
+      ai_visibility_updated_at: new Date().toISOString(),
     })
     .eq("id", companyId);
 }

@@ -1,8 +1,10 @@
 import { ExternalLinkIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import RunAgainButton from "@/components/demo/leader/ai-visibility/run-again-button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -103,6 +105,9 @@ export default function AiVisibilityResultsView({
             {checked && `. Checked ${checked}.`} Claude was never told which
             business we were looking for.
           </CardDescription>
+          <CardAction>
+            <RunAgainButton />
+          </CardAction>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <Stat

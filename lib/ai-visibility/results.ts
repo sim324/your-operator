@@ -5,7 +5,9 @@ import type {
   AiVisibilityBusiness,
   AiVisibilityCitation,
   AiVisibilityIntent,
+  AiVisibilityStatus,
 } from "@/lib/supabase/models";
+import { STALE_RUN_MS } from "@/workflows/check-ai-visibility/constants";
 
 const TOP_COMPETITORS = 8;
 const TOP_SOURCES = 10;
@@ -198,4 +200,15 @@ export async function getAiVisibilityResults(
       .sort((a, b) => b.answers - a.answers)
       .slice(0, TOP_SOURCES),
   };
+}
+
+// True when a check is still marked in progress long after its last status
+// change: cancelled, or killed mid-step, so its failure handler never ran.
+export function isRunStale(
+  status: AiVisibilityStatus | null,
+  lastChangedAt: string | null,
+): boolean {
+  if (status !== "generating" && status !== "checking") return false;
+  if (!lastChangedAt) return false;
+  return Date.now() - new Date(lastChangedAt).getTime() > STALE_RUN_MS;
 }

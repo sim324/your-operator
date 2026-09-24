@@ -9,15 +9,19 @@ import type {
   LeadCompanyStatus,
 } from "@/lib/supabase/models";
 import { checkAiVisibilityWorkflow } from "@/workflows/check-ai-visibility";
-import { ATTEMPTS_PER_QUERY } from "@/workflows/check-ai-visibility/constants";
+import {
+  ATTEMPTS_PER_QUERY,
+  STALE_RUN_MS,
+} from "@/workflows/check-ai-visibility/constants";
 
 export interface AiVisibilityActionResult {
   ok: boolean;
   error?: string;
 }
 
-// The "Check AI visibility" button. The company comes from the demo cookie,
-// never from the client, so a direct POST can only run the caller's own.
+// The "Check AI visibility" and "Run again" buttons. The company comes from
+// the demo cookie, never from the client, so a direct POST can only run the
+// caller's own.
 export async function checkAiVisibility(): Promise<AiVisibilityActionResult> {
   const company = await getCurrentLeadCompany();
   if (!company) {
@@ -32,15 +36,24 @@ export async function checkAiVisibility(): Promise<AiVisibilityActionResult> {
   }
 
   // Atomic claim, like the reviews buttons: a run is ~15 web-search answers,
-  // so a double click must not start two.
+  // so a double click must not start two. Claimable when it never ran,
+  // failed, finished ("Run again"), or is stuck: still in progress long
+  // after its last status change, e.g. a cancelled run whose failure
+  // handler never ran.
   const generating: AiVisibilityStatus = "generating";
   const failed: AiVisibilityStatus = "failed";
+  const staleBefore = new Date(Date.now() - STALE_RUN_MS).toISOString();
   const supabase = getSupabaseServerClient();
   const { data: claimed, error } = await supabase
     .from("lead_companies")
-    .update({ ai_visibility_status: generating })
+    .update({
+      ai_visibility_status: generating,
+      ai_visibility_updated_at: new Date().toISOString(),
+    })
     .eq("id", company.id)
-    .or("ai_visibility_status.is.null,ai_visibility_status.eq.failed")
+    .or(
+      `ai_visibility_status.is.null,ai_visibility_status.in.(failed,ready),ai_visibility_updated_at.lt.${staleBefore}`,
+    )
     .select("id");
 
   if (error) {
