@@ -42,7 +42,7 @@ export default function ReviewVolumeChart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Reviews per month</CardTitle>
+        <CardTitle className="text-2xl font-black">Reviews per month</CardTitle>
         <CardDescription>
           {first
             ? `${formatMonth(first, "long")} to today`
@@ -50,7 +50,10 @@ export default function ReviewVolumeChart({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="aspect-auto h-64 w-full">
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-64 w-full"
+        >
           <LineChart data={monthly} margin={{ top: 8, right: 8, left: 0 }}>
             <CartesianGrid vertical={false} />
             <XAxis

@@ -2,6 +2,7 @@ import { ExternalLinkIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import RunAgainButton from "@/components/demo/leader/ai-visibility/run-again-button";
+import StatCard from "@/components/demo/leader/stat-card";
 import {
   Card,
   CardAction,
@@ -11,36 +12,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { AiVisibilityResults } from "@/lib/ai-visibility/results";
-import type {
-  AiVisibilityIntent,
-  AiVisibilityLocation,
-} from "@/lib/supabase/models";
-import { cn } from "@/lib/utils";
-import { ATTEMPTS_PER_QUERY } from "@/workflows/check-ai-visibility/constants";
 
-const INTENT_LABELS: Record<AiVisibilityIntent, string> = {
-  service_location: "Service + place",
-  best_near_me: "Best near me",
-  problem: "Problem",
-  comparison: "Comparison",
+const ORDINAL_RULES = new Intl.PluralRules("en-US", { type: "ordinal" });
+const ORDINAL_SUFFIXES: Record<Intl.LDMLPluralRule, string> = {
+  zero: "th",
+  one: "st",
+  two: "nd",
+  few: "rd",
+  many: "th",
+  other: "th",
 };
 
-function Stat({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: string;
-  detail?: string;
-}) {
-  return (
-    <div className="space-y-1">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-3xl font-black tabular-nums">{value}</p>
-      {detail && <p className="text-xs text-muted-foreground">{detail}</p>}
-    </div>
-  );
+// 1 -> "1st", 2 -> "2nd", 11 -> "11th", 23 -> "23rd".
+function ordinal(n: number) {
+  return `${n}${ORDINAL_SUFFIXES[ORDINAL_RULES.select(n)]}`;
 }
 
 // One dot per run: filled when that run recommended the business. The text
@@ -48,17 +33,6 @@ function Stat({
 function RunDots({ mentions, runs }: { mentions: number; runs: number }) {
   return (
     <span className="inline-flex items-center gap-2">
-      <span className="inline-flex gap-1" aria-hidden>
-        {Array.from({ length: runs }, (_, i) => (
-          <span
-            key={i}
-            className={cn(
-              "size-2.5 rounded-full",
-              i < mentions ? "bg-primary" : "bg-muted ring-1 ring-border",
-            )}
-          />
-        ))}
-      </span>
       <span className="tabular-nums">
         {mentions} of {runs}
       </span>
@@ -66,96 +40,57 @@ function RunDots({ mentions, runs }: { mentions: number; runs: number }) {
   );
 }
 
-function formatLocation(location: AiVisibilityLocation | null) {
-  if (!location) return null;
-  return [location.city, location.region].filter(Boolean).join(", ");
-}
-
 export default function AiVisibilityResultsView({
   results,
-  companyName,
-  location,
-  checkedAt,
 }: {
   results: AiVisibilityResults;
-  companyName: string;
-  location: AiVisibilityLocation | null;
-  checkedAt: string | null;
 }) {
-  const place = formatLocation(location);
-  const checked = checkedAt
-    ? new Date(checkedAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      })
-    : null;
   const visibility = results.totalRuns
     ? Math.round((results.mentionedRuns / results.totalRuns) * 100)
     : 0;
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard label="Recommended in" value={`${visibility}%`} />
+        <StatCard
+          label="Searches you appear in"
+          value={`${results.queriesWithMention} of ${results.queries.length}`}
+        />
+        <StatCard
+          label="Average rank"
+          value={
+            results.averageRank !== null
+              ? ordinal(Math.round(results.averageRank))
+              : "–"
+          }
+        />
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>How often Claude recommends {companyName}</CardTitle>
+          <CardTitle className="text-2xl font-black">
+            Searches performed
+          </CardTitle>
           <CardDescription>
-            {results.queries.length} unbranded searches, each asked{" "}
-            {ATTEMPTS_PER_QUERY} times with live web search
-            {place && `, searching from ${place}`}
-            {checked && `. Checked ${checked}.`} Claude was never told which
-            business we were looking for.
+            Generated from your website&apos;s messaging.
           </CardDescription>
           <CardAction>
             <RunAgainButton />
           </CardAction>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <Stat
-            label="Recommended in"
-            value={`${visibility}%`}
-            detail={`${results.mentionedRuns} of ${results.totalRuns} answers${
-              results.failedRuns
-                ? ` (${results.failedRuns} couldn't be answered)`
-                : ""
-            }`}
-          />
-          <Stat
-            label="Searches you appear in"
-            value={`${results.queriesWithMention} of ${results.queries.length}`}
-            detail="at least once"
-          />
-          <Stat
-            label="Average position"
-            value={
-              results.averageRank !== null
-                ? `#${results.averageRank.toFixed(1)}`
-                : "–"
-            }
-            detail="when recommended"
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Searches</CardTitle>
-          <CardDescription>
-            What a customer might ask, and whether Claude&apos;s answer included
-            you.
-          </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left text-muted-foreground">
                 <th scope="col" className="py-2 pr-4 font-medium">
-                  Search
+                  Query
                 </th>
                 <th scope="col" className="py-2 pr-4 font-medium">
-                  Recommended
+                  Mentions
                 </th>
                 <th scope="col" className="py-2 pr-4 font-medium">
-                  Best position
+                  Position
                 </th>
                 <th scope="col" className="py-2 font-medium">
                   Top pick instead
@@ -166,19 +101,16 @@ export default function AiVisibilityResultsView({
               {results.queries.map((query) => (
                 <tr key={query.id} className="align-top">
                   <td className="py-3 pr-4">
-                    <p className="font-medium">&ldquo;{query.query}&rdquo;</p>
-                    <Badge variant="secondary" className="mt-1">
-                      {INTENT_LABELS[query.intent]}
-                    </Badge>
+                    <p className="font-medium">{query.query}</p>
                   </td>
                   <td className="py-3 pr-4 whitespace-nowrap">
                     <RunDots mentions={query.mentions} runs={query.runs} />
                   </td>
                   <td className="py-3 pr-4 tabular-nums">
-                    {query.bestRank !== null ? `#${query.bestRank}` : "Not listed"}
+                    {query.bestRank !== null ? `#${query.bestRank}` : "--"}
                   </td>
                   <td className="py-3 text-muted-foreground">
-                    {query.bestRank === 1 ? "You" : (query.usualLeader ?? "–")}
+                    {query.bestRank === 1 ? "You" : (query.usualLeader ?? "--")}
                   </td>
                 </tr>
               ))}
@@ -190,7 +122,9 @@ export default function AiVisibilityResultsView({
       <div className="grid items-start gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Who Claude recommends instead</CardTitle>
+            <CardTitle className="text-2xl font-black">
+              Recommended instead
+            </CardTitle>
             <CardDescription>
               Businesses that came up most across all {results.totalRuns}{" "}
               answers.
@@ -223,8 +157,8 @@ export default function AiVisibilityResultsView({
                       )}
                     </span>
                     <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
-                      {competitor.appearances} answers · avg #
-                      {competitor.averageRank.toFixed(1)}
+                      {competitor.appearances} mentions · avg{" "}
+                      {ordinal(Math.round(competitor.averageRank))}
                     </span>
                   </li>
                 ))}
@@ -239,11 +173,11 @@ export default function AiVisibilityResultsView({
 
         <Card>
           <CardHeader>
-            <CardTitle>Where Claude looked</CardTitle>
+            <CardTitle className="text-2xl font-black">
+              Where Claude looked
+            </CardTitle>
             <CardDescription>
-              Sites that came up in Claude&apos;s web searches, by how many
-              answers found them. Being listed or mentioned on these is how a
-              business gets recommended.
+              Sites that came up in Claude&apos;s default AI web search tool.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -286,9 +220,8 @@ export default function AiVisibilityResultsView({
 
       <p className="text-xs text-muted-foreground">
         AI answers vary from run to run and by person, so treat this as a
-        snapshot. It reflects what Claude recommends from a live web search,
-        which is close to, but not the same as, what someone sees in the Claude
-        app with their own location and history.
+        snapshot. It is close to, but not the same as, what someone sees in the
+        Claude app with their own location and history.
       </p>
     </div>
   );

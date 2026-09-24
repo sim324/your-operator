@@ -30,17 +30,13 @@ function formatDate(iso: string | null) {
     : null;
 }
 
-export default function ReviewThemesCard({
-  data,
-}: {
-  data: ReviewThemes;
-}) {
+export default function ReviewThemesCard({ data }: { data: ReviewThemes }) {
   const top = Math.max(...data.themes.map((theme) => theme.share), 0);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Review themes</CardTitle>
+        <CardTitle className="text-2xl font-black">Review themes</CardTitle>
         <CardDescription>
           What your {data.writtenReviews.toLocaleString()} written reviews talk
           about. A review can mention more than one theme.

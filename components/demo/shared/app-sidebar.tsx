@@ -1,58 +1,42 @@
 "use client";
 
 import {
-  CalendarIcon,
-  ClipboardListIcon,
-  FilterIcon,
-  Gamepad2Icon,
   LayoutDashboardIcon,
-  LifeBuoyIcon,
   MessageSquareIcon,
   RadarIcon,
-  SendIcon,
   StarIcon,
-  TrophyIcon,
-  UsersIcon,
-  VideoIcon,
-  ZapIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentProps } from "react";
 
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemTitle,
+} from "@/components/ui/item";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { ThemeButton } from "@/components/ui/theme-button";
 
 import { NavMain, type NavItem } from "./nav-main";
-import { NavSecondary } from "./nav-secondary";
 import { NavUser } from "./nav-user";
 import { DEFAULT_DEMO_ROLE, DEMO_ROLES, type DemoRole } from "./roles";
 
 // Stub navigation per role. Only each role's home item has a real page for
 // now; the rest point at "#" until those pages exist.
 const NAV_BY_ROLE: Record<DemoRole, NavItem[]> = {
-  rep: [
-    { title: "Dashboard", url: "/demo/rep", icon: <LayoutDashboardIcon /> },
-    { title: "Meetings", url: "#", icon: <VideoIcon /> },
-    { title: "Prospects", url: "#", icon: <UsersIcon /> },
-    { title: "Coaching & games", url: "#", icon: <Gamepad2Icon /> },
-  ],
   leader: [
     {
-      title: "Team overview",
+      title: "Dashboard",
       url: "/demo/leader",
       icon: <LayoutDashboardIcon />,
     },
-    { title: "Game results", url: "#", icon: <TrophyIcon /> },
-    { title: "Intake funnel", url: "#", icon: <FilterIcon /> },
-    { title: "Reviews", url: "#", icon: <StarIcon /> },
+    { title: "Reviews", url: "/demo/leader/reviews", icon: <StarIcon /> },
     {
       title: "AI visibility",
       url: "/demo/leader/ai-visibility",
@@ -61,15 +45,8 @@ const NAV_BY_ROLE: Record<DemoRole, NavItem[]> = {
   ],
   prospect: [
     { title: "Intake", url: "/demo/prospect", icon: <MessageSquareIcon /> },
-    { title: "Booking", url: "#", icon: <CalendarIcon /> },
-    { title: "Client portal", url: "#", icon: <ClipboardListIcon /> },
   ],
 };
-
-const NAV_SECONDARY: NavItem[] = [
-  { title: "Support", url: "#", icon: <LifeBuoyIcon /> },
-  { title: "Feedback", url: "#", icon: <SendIcon /> },
-];
 
 const DEMO_USER = {
   name: "Demo User",
@@ -86,25 +63,18 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href={role.href}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground">
-                  <ZapIcon className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Your Operator</span>
-                  <span className="truncate text-xs">{role.label} demo</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {/* Not a link, so no hover state; the theme toggle is its only action. */}
+        <Item variant="outline" size="sm">
+          <ItemContent>
+            <ItemTitle>Your Operator</ItemTitle>
+          </ItemContent>
+          <ItemActions>
+            <ThemeButton variant="ghost" size="icon-sm" />
+          </ItemActions>
+        </Item>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={NAV_BY_ROLE[role.slug]} />
-        {/* <NavSecondary items={NAV_SECONDARY} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={DEMO_USER} />

@@ -1,4 +1,4 @@
-export type DemoRole = "leader" | "rep" | "prospect";
+export type DemoRole = "leader" | "prospect";
 
 export interface DemoRoleConfig {
   slug: DemoRole;
@@ -8,7 +8,6 @@ export interface DemoRoleConfig {
 
 export const DEMO_ROLES: DemoRoleConfig[] = [
   { slug: "leader", label: "Leader", href: "/demo/leader" },
-  { slug: "rep", label: "Sales Rep", href: "/demo/rep" },
   { slug: "prospect", label: "Prospect", href: "/demo/prospect" },
 ];
 

@@ -1,6 +1,4 @@
 import ElevenLabsWidget from "@/components/demo/prospect/elevenlabs-widget";
-import PageTitle from "@/components/demo/shared/page-title";
-import { Badge } from "@/components/ui/badge";
 import { getCurrentLeadCompany } from "@/lib/intake/current-company";
 
 interface CompanyEnrichment {
@@ -21,9 +19,11 @@ export default async function DemoProspectPage() {
   const companyName = company?.name ?? company?.domain ?? undefined;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2">
+    // data-full-width: the site preview uses the whole canvas, not the
+    // shell's centered max-w-7xl column.
+    <div data-full-width className="flex min-h-0 flex-1 flex-col gap-2">
       {company ? (
-        <div className="relative h-full min-h-0 w-full overflow-hidden border border-border bg-muted">
+        <div className="relative h-full min-h-0 w-full overflow-hidden rounded-4xl bg-muted border border-foreground dark:border-transparent">
           {company.domain && !blocked ? (
             <iframe
               src={`https://${company.domain}`}
@@ -59,7 +59,6 @@ export default async function DemoProspectPage() {
           {agentId && (
             <ElevenLabsWidget
               agentId={agentId}
-              companyId={company.id}
               avatarImageUrl={company.logo_url ?? undefined}
               dynamicVariables={
                 enrichment

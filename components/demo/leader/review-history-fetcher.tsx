@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { DownloadIcon, HistoryIcon } from "lucide-react";
+import { DownloadIcon } from "lucide-react";
 
 import { useCompanyRowUpdates } from "@/components/demo/leader/use-company-row-updates";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import {
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
-  EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
@@ -54,24 +53,21 @@ export default function ReviewHistoryFetcher({
   const isFetching = isStarting || status === "fetching";
 
   return (
-    <Empty className="border">
+    <Empty>
       <EmptyHeader>
-        <EmptyMedia variant="icon">
-          {isFetching ? <Spinner /> : <HistoryIcon />}
-        </EmptyMedia>
         <EmptyTitle>
           {isFetching
-            ? "Pulling your review history"
+            ? "Pulling reviews"
             : status === "failed"
-              ? "Couldn't pull your review history"
+              ? "The pull didn't finish"
               : "See your review trends"}
         </EmptyTitle>
         <EmptyDescription>
           {isFetching
-            ? "Collecting up to 1,000 of your most recent Google reviews. This can take a few minutes; you can leave this page and come back."
+            ? "Collecting your most recent Google reviews"
             : status === "failed"
-              ? "The pull didn't finish. Give it another try."
-              : "Pull up to 1,000 of your most recent Google reviews to see your rating, response rate and review volume over time."}
+              ? "Something went wrong"
+              : "Pull up to 1,000 of your Google reviews"}
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>

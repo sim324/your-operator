@@ -66,7 +66,7 @@ export default function CompanyEnrichmentStatus({
         },
         (payload) => {
           setCompany(payload.new as LeadCompanyRow);
-        },
+        }
       )
       .subscribe();
 
@@ -117,9 +117,7 @@ export default function CompanyEnrichmentStatus({
               title={company.brand_color}
             />
           )}
-          <span className="font-medium">
-            {company.name ?? company.domain}
-          </span>
+          <span className="font-medium">{company.name ?? company.domain}</span>
         </div>
 
         {enrichment.about && (
@@ -158,7 +156,7 @@ export default function CompanyEnrichmentStatus({
         return (
           <div key={step.status} className="flex items-center gap-3 text-sm">
             {done ? (
-              <CheckIcon className="size-4 text-primary" />
+              <CheckIcon className="size-4" />
             ) : active ? (
               <Spinner className="size-4" />
             ) : (

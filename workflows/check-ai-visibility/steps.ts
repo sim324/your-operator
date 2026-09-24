@@ -12,10 +12,12 @@ import {
   type AiVisibilityStatus,
 } from "@/lib/supabase/models";
 
-// Sonnet 5 throughout, like review themes: writing the queries and parsing
-// the answers, and answering the searches themselves with web search.
+// Sonnet 5 writes the queries, like review themes, and answers the searches
+// themselves with web search. Parsing an answer is plain extraction, so it
+// uses the faster Haiku.
 const ANALYSIS_MODEL = "claude-sonnet-5";
 const ANSWER_MODEL = "claude-sonnet-5";
+const EXTRACTION_MODEL = "claude-haiku-4-5";
 const QUERY_COUNT = 5;
 const MAX_SITE_CHARS = 15000;
 const MAX_SEARCHES_PER_ANSWER = 5;
@@ -157,11 +159,14 @@ Write exactly ${QUERY_COUNT} searches, covering at least three of the four inten
 // ---------------------------------------------------------------------------
 
 // Each attempt re-runs paid web searches; one retry covers a transient
-// failure without tripling the bill.
+// failure without tripling the bill. This step retry is the only retry: the
+// SDK's own is off, or a stalled call would be retried inside the step too.
 const ANSWER_MAX_RETRIES = 1;
-// Per API call. The SDK default is 10 minutes, so one hung call could stall
-// the whole check; this fails it fast and lets the step's retry take over.
-const ANSWER_TIMEOUT_MS = 120_000;
+// Answers stream, and a call that goes this long without a single event is
+// treated as stalled. Healthy answers go at most ~5s between events (mostly
+// while a search runs), so this catches a hang without cutting off a slow
+// but working answer.
+const ANSWER_IDLE_TIMEOUT_MS = 30_000;
 // Search results can run to dozens of URLs per answer; keep the most useful.
 const MAX_SOURCES_PER_ANSWER = 20;
 
@@ -169,6 +174,32 @@ interface ClaudeAnswer {
   model: string;
   answer: string;
   sources: AiVisibilityCitation[];
+}
+
+// One streamed turn, aborted once it goes ANSWER_IDLE_TIMEOUT_MS without an
+// event. The SDK's own timeout only covers the wait for response headers on a
+// stream, so it can't catch a stream that stalls partway.
+async function streamTurn(
+  client: Anthropic,
+  params: Anthropic.MessageStreamParams,
+): Promise<Anthropic.Message> {
+  const controller = new AbortController();
+  let timer = setTimeout(() => controller.abort(), ANSWER_IDLE_TIMEOUT_MS);
+  const stream = client.messages.stream(params, { signal: controller.signal });
+  stream.on("streamEvent", () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => controller.abort(), ANSWER_IDLE_TIMEOUT_MS);
+  });
+  try {
+    return await stream.finalMessage();
+  } catch (err) {
+    if (controller.signal.aborted) {
+      throw new Error(`Stalled: no response for ${ANSWER_IDLE_TIMEOUT_MS / 1000}s`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // The answering call knows only the customer's question and where they are
@@ -179,7 +210,7 @@ async function askClaude(
   question: string,
   location: AiVisibilityLocation | null,
 ): Promise<ClaudeAnswer> {
-  const client = new Anthropic({ timeout: ANSWER_TIMEOUT_MS });
+  const client = new Anthropic({ maxRetries: 0 });
   const messages: Anthropic.MessageParam[] = [
     { role: "user", content: question },
   ];
@@ -189,7 +220,7 @@ async function askClaude(
 
   let response: Anthropic.Message | null = null;
   for (let turn = 0; turn <= MAX_CONTINUATIONS; turn++) {
-    response = await client.messages.create({
+    response = await streamTurn(client, {
       model: ANSWER_MODEL,
       max_tokens: 16000,
       // Without this, "near me" searches get "what's your location?" back.
@@ -397,7 +428,7 @@ export async function extractAnswerStep(answerId: string) {
   if (row.answer) {
     const client = new Anthropic();
     const response = await client.messages.parse({
-      model: ANALYSIS_MODEL,
+      model: EXTRACTION_MODEL,
       max_tokens: 8000,
       system: EXTRACTION_SYSTEM,
       messages: [
@@ -414,7 +445,6 @@ ${row.answer}
         },
       ],
       output_config: {
-        effort: "low",
         format: zodOutputFormat(ExtractionSchema),
       },
     });

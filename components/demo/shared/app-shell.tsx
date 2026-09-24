@@ -22,9 +22,19 @@ export default function AppShell({ children }: { children: ReactNode }) {
         className="min-h-0 flex-1 transform-gpu"
       >
         <AppSidebar className="h-full" />
-        <SidebarInset className="overflow-y-auto">
+        {/* The header stays put and only the canvas below it scrolls. The
+            scroll container is full width so its scrollbar sits at the
+            window edge, not beside the centered max-w-7xl content.
+            A page marked data-fill-height gets a fixed height on desktop
+            instead, so it can scroll its own columns (reviews), and one
+            marked data-full-width drops the max width (prospect preview). */}
+        <SidebarInset className="min-h-0 overflow-hidden">
           <AppHeader />
-          <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 p-4 lg:has-[[data-fill-height]]:min-h-0 has-[[data-full-width]]:max-w-none">
+              {children}
+            </div>
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

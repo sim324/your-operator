@@ -26,7 +26,11 @@ export default function RoleSwitcherBanner({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  const currentRole = DEMO_ROLES.find((role) => role.href === pathname);
+  // The role's home or any page under it (/demo/leader/reviews is still the
+  // leader), matched on whole path segments.
+  const currentRole = DEMO_ROLES.find(
+    (role) => pathname === role.href || pathname.startsWith(`${role.href}/`),
+  );
 
   function handleRoleChange(slug: string) {
     const role = DEMO_ROLES.find((r) => r.slug === slug);

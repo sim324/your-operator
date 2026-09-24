@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { RadarIcon, SparklesIcon } from "lucide-react";
+import { SparklesIcon, XIcon } from "lucide-react";
 
 import { useCompanyRowUpdates } from "@/components/demo/leader/use-company-row-updates";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,11 @@ import {
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
-  EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import {
+  cancelAiVisibility,
   checkAiVisibility,
   getAiVisibilityProgress,
   type AiVisibilityProgress,
@@ -26,7 +26,6 @@ const PROGRESS_POLL_MS = 4000;
 
 interface AiVisibilityRunnerProps {
   companyId: string;
-  companyName: string;
   initialStatus: AiVisibilityStatus | null;
   // In progress far longer than a run takes (cancelled or killed); the
   // server will let it be started over.
@@ -37,7 +36,6 @@ function copyFor(
   status: AiVisibilityStatus | null,
   isStarting: boolean,
   isStuck: boolean,
-  companyName: string,
 ) {
   if (isStuck) {
     return {
@@ -48,32 +46,30 @@ function copyFor(
   }
   if (isStarting || status === "generating") {
     return {
-      title: "Writing your customers' searches",
-      description: `Working out what someone would ask an AI assistant when they need what ${companyName} offers.`,
+      title: "Writing searches",
+      description: `Working out what a prospect would ask AI`,
     };
   }
   if (status === "checking") {
     return {
       title: "Asking Claude",
-      description:
-        "Running each search 3 times with live web search, without telling Claude who you are. This takes a few minutes; you can leave this page and come back.",
+      description: "Running blind tests",
     };
   }
   if (status === "failed") {
     return {
       title: "The check didn't finish",
-      description: "Something went wrong partway through. Give it another try.",
+      description: "Something went wrong",
     };
   }
   return {
     title: "Does AI recommend you?",
-    description: `We'll write 5 searches a customer would make, like "best ___ near me", ask Claude each one 3 times with live web search, and see whether it recommends ${companyName}, where it ranks you, and who it picks instead.`,
+    description: `We'll write 5 searches a customer would make, then ask AI`,
   };
 }
 
 export default function AiVisibilityRunner({
   companyId,
-  companyName,
   initialStatus,
   isStale,
 }: AiVisibilityRunnerProps) {
@@ -81,6 +77,7 @@ export default function AiVisibilityRunner({
   const [status, setStatus] = useState(initialStatus);
   const [error, setError] = useState<string | null>(null);
   const [isStarting, startTransition] = useTransition();
+  const [isCancelling, cancelTransition] = useTransition();
 
   useCompanyRowUpdates(companyId, (row) => {
     const next = row.ai_visibility_status as AiVisibilityStatus | null;
@@ -121,19 +118,31 @@ export default function AiVisibilityRunner({
     });
   }
 
+  function handleCancel() {
+    setError(null);
+    cancelTransition(async () => {
+      const result = await cancelAiVisibility();
+      if (!result.ok) {
+        setError(result.error ?? "Could not cancel the check.");
+        return;
+      }
+      setStatus(null);
+      setProgress(null);
+      router.refresh();
+    });
+  }
+
   const inProgress = status === "generating" || status === "checking";
   // Stale only applies to the status the page loaded with; any live update
   // means the run is moving again.
-  const isStuck = isStale && inProgress && status === initialStatus && !isStarting;
+  const isStuck =
+    isStale && inProgress && status === initialStatus && !isStarting;
   const isWorking = isStarting || (inProgress && !isStuck);
-  const copy = copyFor(status, isStarting, isStuck, companyName);
+  const copy = copyFor(status, isStarting, isStuck);
 
   return (
-    <Empty className="border">
+    <Empty className="">
       <EmptyHeader>
-        <EmptyMedia variant="icon">
-          {isWorking ? <Spinner /> : <RadarIcon />}
-        </EmptyMedia>
         <EmptyTitle>{copy.title}</EmptyTitle>
         <EmptyDescription>{copy.description}</EmptyDescription>
       </EmptyHeader>
@@ -170,6 +179,20 @@ export default function AiVisibilityRunner({
               ? "Try again"
               : "Check AI visibility"}
         </Button>
+        {inProgress && !isStarting && (
+          <Button
+            variant="ghost"
+            onClick={handleCancel}
+            disabled={isCancelling}
+          >
+            {isCancelling ? (
+              <Spinner data-icon="inline-start" />
+            ) : (
+              <XIcon data-icon="inline-start" />
+            )}
+            Cancel
+          </Button>
+        )}
         {error && <p className="text-sm text-destructive">{error}</p>}
       </EmptyContent>
     </Empty>

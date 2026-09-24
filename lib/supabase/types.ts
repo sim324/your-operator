@@ -137,6 +137,7 @@ export type Database = {
       lead_companies: {
         Row: {
           ai_visibility_location: Json | null
+          ai_visibility_run_id: string | null
           ai_visibility_status: string | null
           ai_visibility_updated_at: string | null
           brand_color: string | null
@@ -162,6 +163,7 @@ export type Database = {
         }
         Insert: {
           ai_visibility_location?: Json | null
+          ai_visibility_run_id?: string | null
           ai_visibility_status?: string | null
           ai_visibility_updated_at?: string | null
           brand_color?: string | null
@@ -187,6 +189,7 @@ export type Database = {
         }
         Update: {
           ai_visibility_location?: Json | null
+          ai_visibility_run_id?: string | null
           ai_visibility_status?: string | null
           ai_visibility_updated_at?: string | null
           brand_color?: string | null

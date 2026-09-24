@@ -47,7 +47,7 @@ export default function GoogleReviews({ place, isSample }: GoogleReviewsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Google reviews</CardTitle>
+        <CardTitle className="text-2xl font-black">Google reviews</CardTitle>
         <CardDescription>
           {place.googleMapsUri ? (
             <a
@@ -70,9 +70,9 @@ export default function GoogleReviews({ place, isSample }: GoogleReviewsProps) {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <div className="flex items-end gap-3">
-          <span className="text-4xl font-black tabular-nums">
-            {place.rating?.toFixed(1) ?? "–"}
+        <div className="flex items-center gap-3">
+          <span className="text-7xl font-black tabular-nums">
+            {place.rating?.toFixed(1) ?? "--"}
           </span>
           <div className="space-y-1 pb-1">
             {place.rating !== undefined && <Stars rating={place.rating} />}
@@ -117,7 +117,10 @@ export default function GoogleReviews({ place, isSample }: GoogleReviewsProps) {
                     </span>
                   </div>
                   {review.rating !== undefined && (
-                    <Stars rating={review.rating} className="[&_svg]:size-3.5" />
+                    <Stars
+                      rating={review.rating}
+                      className="[&_svg]:size-3.5"
+                    />
                   )}
                   {review.text?.text && <ReviewText text={review.text.text} />}
                 </li>

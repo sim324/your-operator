@@ -13,7 +13,6 @@ import {
 } from "@/lib/ai-visibility/results";
 import { getCurrentLeadCompany } from "@/lib/intake/current-company";
 import type {
-  AiVisibilityLocation,
   AiVisibilityStatus,
   LeadCompanyRow,
   LeadCompanyStatus,
@@ -22,19 +21,17 @@ import type {
 const STATUS_ENRICHED: LeadCompanyStatus = "enriched";
 
 async function AiVisibilitySection({ company }: { company: LeadCompanyRow }) {
-  const companyName = company.name ?? company.domain ?? "your business";
-
   // Queries are written from the scraped site, so enrichment has to have
   // run on a real website. Sample and no-website companies have neither.
   if (!company.domain || company.status !== STATUS_ENRICHED) {
     return (
-      <Empty className="border">
+      <Empty>
         <EmptyHeader>
           <EmptyTitle>Needs a website</EmptyTitle>
           <EmptyDescription>
-            AI visibility is checked against searches written from your
-            website, so it needs a company that came through intake with a
-            website we could analyze.
+            AI visibility is checked against searches written from your website,
+            so it needs a company that came through intake with a website we
+            could analyze.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -46,7 +43,6 @@ async function AiVisibilitySection({ company }: { company: LeadCompanyRow }) {
     return (
       <AiVisibilityRunner
         companyId={company.id}
-        companyName={companyName}
         initialStatus={status}
         isStale={isRunStale(status, company.ai_visibility_updated_at)}
       />
@@ -54,24 +50,23 @@ async function AiVisibilitySection({ company }: { company: LeadCompanyRow }) {
   }
 
   const results = await getAiVisibilityResults(company.id, company.domain);
-  return (
-    <AiVisibilityResultsView
-      results={results}
-      companyName={companyName}
-      location={company.ai_visibility_location as AiVisibilityLocation | null}
-      checkedAt={company.ai_visibility_updated_at}
-    />
-  );
+  return <AiVisibilityResultsView results={results} />;
 }
 
 export default async function DemoLeaderAiVisibilityPage() {
   const company = await getCurrentLeadCompany();
 
+  // A flex column filling the shell, like the prospect page, so the
+  // runner's empty state stretches to the bottom of the page.
   return (
-    <div className="space-y-6">
+    <div className="flex min-h-0 flex-1 flex-col gap-6">
       <PageTitle>AI Visibility</PageTitle>
       {company ? (
-        <AiVisibilitySection company={company} />
+        // Same inset as the reviews columns, so cards line up across pages;
+        // a flex column so the runner's empty state still fills the height.
+        <div className="flex min-h-0 flex-1 flex-col lg:p-1 lg:pb-2">
+          <AiVisibilitySection company={company} />
+        </div>
       ) : (
         <p className="text-muted-foreground">
           Submit the intake form to check how AI recommends your company.

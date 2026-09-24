@@ -1,6 +1,6 @@
 "use server";
 
-import { start } from "workflow/api";
+import { getRun, start } from "workflow/api";
 
 import { getCurrentLeadCompany } from "@/lib/intake/current-company";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -64,13 +64,60 @@ export async function checkAiVisibility(): Promise<AiVisibilityActionResult> {
   }
 
   try {
-    await start(checkAiVisibilityWorkflow, [company.id]);
+    const run = await start(checkAiVisibilityWorkflow, [company.id]);
+    // Kept so Cancel can stop this run.
+    await supabase
+      .from("lead_companies")
+      .update({ ai_visibility_run_id: run.runId })
+      .eq("id", company.id);
   } catch {
     await supabase
       .from("lead_companies")
       .update({ ai_visibility_status: failed })
       .eq("id", company.id);
     return { ok: false, error: "Could not start the check." };
+  }
+
+  return { ok: true };
+}
+
+// The "Cancel" button while a check runs (or looks stuck). Cancelling the
+// run stops any step that hasn't started, but steps already running finish:
+// answers mid-search still complete and are billed, and their rows are
+// replaced by the next run. The page goes back to its never-run state.
+export async function cancelAiVisibility(): Promise<AiVisibilityActionResult> {
+  const company = await getCurrentLeadCompany();
+  if (!company) {
+    return { ok: false, error: "Submit the intake form first." };
+  }
+
+  const inProgress: AiVisibilityStatus[] = ["generating", "checking"];
+  if (!inProgress.includes(company.ai_visibility_status as AiVisibilityStatus)) {
+    return { ok: true };
+  }
+  if (company.ai_visibility_run_id) {
+    try {
+      await getRun(company.ai_visibility_run_id).cancel();
+    } catch {
+      // Already finished or gone; resetting the status below is all that's
+      // left to do.
+    }
+  }
+
+  // Only while still in progress: a run that finished in the meantime keeps
+  // its results.
+  const supabase = getSupabaseServerClient();
+  const { error } = await supabase
+    .from("lead_companies")
+    .update({
+      ai_visibility_status: null,
+      ai_visibility_run_id: null,
+      ai_visibility_updated_at: new Date().toISOString(),
+    })
+    .eq("id", company.id)
+    .in("ai_visibility_status", inProgress);
+  if (error) {
+    return { ok: false, error: "Could not cancel the check." };
   }
 
   return { ok: true };

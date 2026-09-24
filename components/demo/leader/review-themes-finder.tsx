@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { SparklesIcon, TagsIcon } from "lucide-react";
+import { SparklesIcon } from "lucide-react";
 
 import { useCompanyRowUpdates } from "@/components/demo/leader/use-company-row-updates";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import {
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
-  EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
@@ -27,27 +26,24 @@ function copyFor(status: ReviewThemesStatus | null, isStarting: boolean) {
   if (isStarting || status === "discovering") {
     return {
       title: "Reading your reviews",
-      description:
-        "Finding the topics your customers talk about most. This takes a minute or two.",
+      description: "Finding what customers talk about",
     };
   }
   if (status === "tagging") {
     return {
-      title: "Sorting reviews into themes",
-      description:
-        "Themes found. Now tagging each review with the themes it mentions.",
+      title: "Sorting reviews",
+      description: "Tagging each review with its themes",
     };
   }
   if (status === "failed") {
     return {
       title: "Couldn't find themes",
-      description: "Something went wrong partway through. Give it another try.",
+      description: "Something went wrong",
     };
   }
   return {
     title: "What are customers talking about?",
-    description:
-      "Group your written reviews into themes specific to your business, like staff, pricing or wait times, to see what comes up most.",
+    description: "We'll group your reviews into themes",
   };
 }
 
@@ -86,11 +82,8 @@ export default function ReviewThemesFinder({
   const copy = copyFor(status, isStarting);
 
   return (
-    <Empty className="border">
+    <Empty>
       <EmptyHeader>
-        <EmptyMedia variant="icon">
-          {isWorking ? <Spinner /> : <TagsIcon />}
-        </EmptyMedia>
         <EmptyTitle>{copy.title}</EmptyTitle>
         <EmptyDescription>{copy.description}</EmptyDescription>
       </EmptyHeader>

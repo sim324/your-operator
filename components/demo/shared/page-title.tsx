@@ -4,5 +4,5 @@ export default function PageTitle({
   className,
   ...props
 }: React.ComponentProps<"h1">) {
-  return <h1 className={cn("text-2xl font-black", className)} {...props} />;
+  return <h1 className={cn("text-4xl font-black", className)} {...props} />;
 }

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { MapPinIcon, SearchIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 
 import { useCompanyRowUpdates } from "@/components/demo/leader/use-company-row-updates";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import {
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
-  EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
@@ -30,24 +29,23 @@ function copyFor(state: LookupState, companyName: string) {
   switch (state) {
     case "searching":
       return {
-        title: "Finding your Google listing",
-        description:
-          "Checking your site for a Maps link and matching it against Google. This usually takes under a minute.",
+        title: "Finding your listing",
+        description: "Matching your website to Google",
       };
     case "not_found":
       return {
-        title: "We couldn't find your Google listing",
-        description: `No Google Business listing matched ${companyName}'s website. Adding a Google Maps link to the site's contact page usually fixes this.`,
+        title: "No Google listing found",
+        description: `Nothing matched ${companyName}'s website`,
       };
     case "failed":
       return {
-        title: "Something went wrong",
-        description: "The lookup didn't finish. Give it another try.",
+        title: "The lookup didn't finish",
+        description: "Something went wrong",
       };
     default:
       return {
-        title: "Get started",
-        description: `Pull in ${companyName}'s Google Business listing.`,
+        title: "Find your Google listing",
+        description: `We'll pull in ${companyName}'s Google reviews`,
       };
   }
 }
@@ -88,17 +86,14 @@ export default function GooglePlaceFinder({
   const state: LookupState = isSearching
     ? "searching"
     : status === "not_found" || status === "failed"
-    ? status
-    : "idle";
+      ? status
+      : "idle";
   const copy = copyFor(state, companyName);
 
   return (
-    <Empty className="border">
+    <Empty>
       <EmptyHeader>
-        <EmptyMedia variant="icon">
-          {isSearching ? <Spinner /> : <MapPinIcon />}
-        </EmptyMedia>
-        <EmptyTitle className="font-sans">{copy.title}</EmptyTitle>
+        <EmptyTitle>{copy.title}</EmptyTitle>
         <EmptyDescription>{copy.description}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>

@@ -1,5 +1,3 @@
-import { sleep } from "workflow";
-
 import { ATTEMPTS_PER_QUERY } from "./constants";
 import {
   answerQueryStep,
@@ -7,10 +5,6 @@ import {
   generateQueriesStep,
   setVisibilityStatusStep,
 } from "./steps";
-
-// Every answer + parse pair runs in parallel, but they start this far apart
-// so 15 web-search calls don't hit the API in the same instant.
-const STAGGER_SECS = 1;
 
 // Started from the AI visibility page's "Check AI visibility" button (see
 // lib/ai-visibility/actions.ts). The caller has already set
@@ -30,12 +24,11 @@ export async function checkAiVisibilityWorkflow(companyId: string) {
       })),
     );
 
-    // Raw Promise.all only: allSettled/.catch over steps swallows the
-    // runtime's suspend signal and hangs the workflow. The stagger uses the
-    // workflow's durable sleep, so nothing sits waiting in a function.
+    // Every answer + parse pair runs in parallel. Raw Promise.all only:
+    // allSettled/.catch over steps swallows the runtime's suspend signal and
+    // hangs the workflow.
     await Promise.all(
-      jobs.map(async ({ queryId, attempt }, index) => {
-        if (index > 0) await sleep(`${index * STAGGER_SECS}s`);
+      jobs.map(async ({ queryId, attempt }) => {
         const { answerId, failed } = await answerQueryStep(
           companyId,
           queryId,

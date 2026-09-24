@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  axes: ["SOFT", "WONK", "opsz"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "youroperator.ai",
@@ -26,8 +19,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         "h-full",
         "antialiased",
         "font-sans",
-        inter.variable,
-        fraunces.variable
+        inter.variable
       )}
       suppressHydrationWarning
     >

@@ -22,7 +22,9 @@ export function useCompanyRowUpdates(
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
     const channel = supabase
-      .channel(`lead-company-row-${companyId}-${Math.random().toString(36).slice(2)}`)
+      .channel(
+        `lead-company-row-${companyId}-${Math.random().toString(36).slice(2)}`,
+      )
       .on(
         "postgres_changes",
         {

@@ -209,15 +209,10 @@ export default function EmailGateDialog({
           if (!submitted) event.preventDefault();
         }}
       >
-        <DialogHeader>
-          <DialogTitle className="text-5xl font-black font-sans">
+        <DialogHeader className="gap-4">
+          <DialogTitle className="text-4xl font-black font-sans">
             See it in action
           </DialogTitle>
-          <DialogDescription className="text-2xl">
-            {submitted
-              ? "Welcome back — here's what we found."
-              : "Share a bit about you and your company to continue."}
-          </DialogDescription>
         </DialogHeader>
 
         {companyId ? (
