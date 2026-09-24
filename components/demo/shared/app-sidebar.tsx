@@ -43,10 +43,10 @@ const NAV_BY_ROLE: Record<DemoRole, NavItem[]> = {
     { title: "Prospects", url: "#", icon: <UsersIcon /> },
     { title: "Coaching & games", url: "#", icon: <Gamepad2Icon /> },
   ],
-  manager: [
+  leader: [
     {
       title: "Team overview",
-      url: "/demo/manager",
+      url: "/demo/leader",
       icon: <LayoutDashboardIcon />,
     },
     { title: "Game results", url: "#", icon: <TrophyIcon /> },

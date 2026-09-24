@@ -23,3 +23,33 @@ export type LeadCompanyStatus =
   | "uploading"
   | "enriched"
   | "failed";
+
+// supabase/migrations/20260923120000_google_place_lookup.sql. Null (not in
+// this union) means the lookup was never started.
+export type GooglePlaceStatus = "searching" | "found" | "not_found" | "failed";
+
+export type LeadReviewRow = Database["public"]["Tables"]["lead_reviews"]["Row"];
+export type LeadReviewInsert =
+  Database["public"]["Tables"]["lead_reviews"]["Insert"];
+
+// supabase/migrations/20260924120000_lead_reviews.sql. Null = never pulled.
+export type GoogleReviewsStatus = "fetching" | "ready" | "failed";
+
+export type ReviewThemeRow =
+  Database["public"]["Tables"]["review_themes"]["Row"];
+
+// supabase/migrations/20260925120000_review_themes.sql. Null = never run.
+export type ReviewThemesStatus = "discovering" | "tagging" | "ready" | "failed";
+
+// Shared across companies so different businesses stay comparable. Keep in
+// sync with the review_themes.category CHECK constraint.
+export const REVIEW_THEME_CATEGORIES = [
+  "people_service",
+  "price_billing",
+  "scheduling_access",
+  "results_quality",
+  "communication",
+  "place_product",
+  "other",
+] as const;
+export type ReviewThemeCategory = (typeof REVIEW_THEME_CATEGORIES)[number];

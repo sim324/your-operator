@@ -47,9 +47,16 @@ export type Database = {
           domain: string | null
           embeddable: boolean | null
           enrichment: Json
+          google_maps_url: string | null
+          google_place_id: string | null
+          google_place_status: string | null
+          google_reviews_fetched_at: string | null
+          google_reviews_status: string | null
           id: string
           logo_url: string | null
           name: string | null
+          review_themes_status: string | null
+          review_themes_updated_at: string | null
           scraped_content: string | null
           source: string
           status: string
@@ -62,9 +69,16 @@ export type Database = {
           domain?: string | null
           embeddable?: boolean | null
           enrichment?: Json
+          google_maps_url?: string | null
+          google_place_id?: string | null
+          google_place_status?: string | null
+          google_reviews_fetched_at?: string | null
+          google_reviews_status?: string | null
           id?: string
           logo_url?: string | null
           name?: string | null
+          review_themes_status?: string | null
+          review_themes_updated_at?: string | null
           scraped_content?: string | null
           source?: string
           status?: string
@@ -77,9 +91,16 @@ export type Database = {
           domain?: string | null
           embeddable?: boolean | null
           enrichment?: Json
+          google_maps_url?: string | null
+          google_place_id?: string | null
+          google_place_status?: string | null
+          google_reviews_fetched_at?: string | null
+          google_reviews_status?: string | null
           id?: string
           logo_url?: string | null
           name?: string | null
+          review_themes_status?: string | null
+          review_themes_updated_at?: string | null
           scraped_content?: string | null
           source?: string
           status?: string
@@ -112,6 +133,130 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "lead_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "lead_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_reviews: {
+        Row: {
+          body: string | null
+          company_id: string
+          created_at: string
+          external_id: string
+          id: string
+          owner_responded_at: string | null
+          owner_response: string | null
+          published_at: string | null
+          rating: number | null
+          review_url: string | null
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          company_id: string
+          created_at?: string
+          external_id: string
+          id?: string
+          owner_responded_at?: string | null
+          owner_response?: string | null
+          published_at?: string | null
+          rating?: number | null
+          review_url?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          company_id?: string
+          created_at?: string
+          external_id?: string
+          id?: string
+          owner_responded_at?: string | null
+          owner_response?: string | null
+          published_at?: string | null
+          rating?: number | null
+          review_url?: string | null
+          source?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_reviews_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "lead_companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_theme_tags: {
+        Row: {
+          review_id: string
+          theme_id: string
+        }
+        Insert: {
+          review_id: string
+          theme_id: string
+        }
+        Update: {
+          review_id?: string
+          theme_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_theme_tags_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "lead_reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_theme_tags_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "review_themes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_themes: {
+        Row: {
+          category: string
+          company_id: string
+          created_at: string
+          description: string
+          id: string
+          key: string
+          name: string
+          position: number
+        }
+        Insert: {
+          category: string
+          company_id: string
+          created_at?: string
+          description: string
+          id?: string
+          key: string
+          name: string
+          position?: number
+        }
+        Update: {
+          category?: string
+          company_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          key?: string
+          name?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_themes_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "lead_companies"

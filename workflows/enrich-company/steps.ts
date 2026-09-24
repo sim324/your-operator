@@ -1,57 +1,18 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { FatalError, RetryableError } from "workflow";
+import { FatalError } from "workflow";
 import { z } from "zod";
 
+import { firecrawlRequest } from "@/lib/firecrawl/request";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type {
   LeadCompanySource,
   LeadCompanyStatus,
 } from "@/lib/supabase/models";
 
-const FIRECRAWL_BASE_URL = "https://api.firecrawl.dev/v1";
 const SOURCE_FIRECRAWL: LeadCompanySource = "firecrawl";
 const STATUS_ENRICHED: LeadCompanyStatus = "enriched";
 const STATUS_FAILED: LeadCompanyStatus = "failed";
-
-// Only used to classify Firecrawl's response, not to auth other calls.
-function firecrawlHeaders() {
-  return {
-    Authorization: `Bearer ${process.env.FIRECRAWL_API_KEY}`,
-    "Content-Type": "application/json",
-  };
-}
-
-async function firecrawlRequest(path: string, body: unknown) {
-  const response = await fetch(`${FIRECRAWL_BASE_URL}${path}`, {
-    method: "POST",
-    headers: firecrawlHeaders(),
-    body: JSON.stringify(body),
-  });
-
-  if (response.status === 429) {
-    const retryAfterSeconds = Number(response.headers.get("retry-after"));
-    const retryAfterMs =
-      Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
-        ? retryAfterSeconds * 1000
-        : 30_000;
-    throw new RetryableError("Firecrawl rate limited", {
-      retryAfter: retryAfterMs,
-    });
-  }
-
-  if (response.status === 404 || response.status === 400) {
-    throw new FatalError(
-      `Firecrawl ${path} rejected the request (${response.status})`,
-    );
-  }
-
-  if (!response.ok) {
-    throw new Error(`Firecrawl ${path} failed with status ${response.status}`);
-  }
-
-  return response.json();
-}
 
 // Best-to-worst candidates for a square, brand-representative logo image.
 // apple-touch-icon is usually a clean high-res square PNG; a generic <link

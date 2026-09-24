@@ -10,6 +10,7 @@ import type {
   LeadCompanyStatus,
 } from "@/lib/supabase/models";
 import { LEAD_COMPANY_COOKIE } from "@/lib/intake/constants";
+import { normalizeDomain } from "@/lib/intake/domain";
 import { enrichCompanyWorkflow } from "@/workflows/enrich-company";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,16 +31,6 @@ export interface SubmitIntakeResult {
   // watch the company row (e.g. via Realtime) for progress, rather than
   // treating it as already finished.
   isEnriching?: boolean;
-}
-
-// "https://www.acme.com/pricing" -> "acme.com"
-function normalizeDomain(raw: string): string {
-  return raw
-    .trim()
-    .toLowerCase()
-    .replace(/^[a-z]+:\/\//, "")
-    .replace(/^www\./, "")
-    .replace(/\/.*$/, "");
 }
 
 const SAMPLE_COMPANY = {
