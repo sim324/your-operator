@@ -1,4 +1,3 @@
-import CtaButtonBook from "../site/cta-button-book";
 import { ThemeButton } from "../ui/theme-button";
 
 export default function WebHeader() {
@@ -11,7 +10,6 @@ export default function WebHeader() {
           youroperator.ai
         </span>
         <div className="flex flex-row items-center gap-2">
-          {/* <CtaButtonBook /> */}
           <ThemeButton />
         </div>
       </div>

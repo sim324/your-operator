@@ -30,7 +30,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             marked data-full-width drops the max width (prospect preview). */}
         <SidebarInset className="min-h-0 overflow-hidden">
           <AppHeader />
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-none">
             <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 p-4 lg:has-[[data-fill-height]]:min-h-0 has-[[data-full-width]]:max-w-none">
               {children}
             </div>

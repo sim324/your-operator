@@ -34,7 +34,7 @@ const SOURCE_SAMPLE: LeadCompanySource = "sample";
 // children don't shrink: Card is overflow-hidden, which would otherwise let
 // it squash to the column's height and clip itself instead of scrolling.
 const COLUMN =
-  "flex flex-col gap-6 lg:w-[32rem] lg:shrink-0 lg:snap-start lg:overflow-y-auto lg:p-1 lg:pb-2 lg:*:shrink-0";
+  "flex flex-col gap-6 lg:w-[32rem] lg:shrink-0 lg:snap-start lg:overflow-y-auto lg:overscroll-none lg:p-1 lg:pb-2 lg:*:shrink-0";
 
 async function ReviewsSection({ company }: { company: LeadCompanyRow }) {
   if (company.source === SOURCE_SAMPLE) {
@@ -167,7 +167,7 @@ export default async function DemoLeaderReviewsPage() {
       {company ? (
         // The right edge fades out to show there's more to scroll to; the end
         // padding lets the last column scroll clear of the fade.
-        <div className="flex flex-1 flex-col gap-6 lg:min-h-0 lg:snap-x lg:flex-row lg:overflow-x-auto lg:pr-16 lg:[mask-image:linear-gradient(to_right,#000_calc(100%-4rem),transparent)]">
+        <div className="flex flex-1 flex-col gap-6 lg:min-h-0 lg:snap-x lg:flex-row lg:overflow-x-auto lg:overscroll-none lg:pr-16 lg:[mask-image:linear-gradient(to_right,#000_calc(100%-4rem),transparent)]">
           <section className={COLUMN}>
             <ReviewsSection company={company} />
           </section>
