@@ -129,3 +129,146 @@
     @apply font-sans overscroll-none;
   }
 }
+
+
+/* ==========================================================================
+   Marketing site (app/(site)) -- brand tokens, utilities and scoped rules.
+   Everything that could touch the product UI is scoped to .marketing.
+   ========================================================================== */
+
+@theme inline {
+  --font-display: var(--font-bricolage), var(--font-geist), system-ui, sans-serif;
+  --font-hand: var(--font-caveat), cursive;
+
+  /* Your Operator brand tokens, from the design mockups */
+  --color-canvas: #04060b;
+  --color-page: #0a0f1c;
+  --color-surface: #0b1020;
+  --color-surface-deep: #050814;
+
+  --color-ink: #f7f8fb;
+  --color-ink-1: #f3f5fa;
+  --color-ink-2: #e6ebf5;
+  --color-ink-3: #c9d2e3;
+  --color-ink-4: #a9b4cc;
+  --color-ink-5: #a3adc2;
+  --color-ink-6: #8e99b2;
+  --color-ink-dim: #7d89a6;
+  --color-ink-lead: #d3dae8;
+
+  --color-brand: #2f6bff;
+  --color-brand-hover: #4580ff;
+  --color-azure-200: #bfdbfe;
+  --color-azure-300: #93c5fd;
+  --color-azure-400: #60a5fa;
+  --color-star: #fbbf24;
+  --color-danger: #e5484d;
+
+  --shadow-cta: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 14px 30px -12px rgb(47 107 255 / 0.85), 0 2px 6px rgb(0 0 0 / 0.3);
+  --shadow-panel: inset 0 1px 0 rgb(255 255 255 / 0.09), inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 24px 60px -24px rgb(0 0 0 / 0.75);
+  --shadow-frame: inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 0 0 1px rgb(255 255 255 / 0.09), 0 60px 120px -40px rgb(0 0 0 / 0.95), 0 0 160px -50px rgb(96 165 250 / 0.5);
+  --shadow-chip: 0 8px 18px -8px rgb(0 0 0 / 0.7), inset 0 -1px 0 rgb(0 0 0 / 0.08);
+
+  --animate-shot-in: shot-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-nav-drop: nav-drop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  @keyframes nav-drop {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes shot-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.995); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+/* The marketing site is dark-only: dark shadcn variables, in its brand colours. */
+.marketing.dark {
+  --background: #070a12;
+  --foreground: #f3f5fa;
+  --card: #0f172a;
+  --card-foreground: #f3f5fa;
+  --popover: #0f172a;
+  --popover-foreground: #f3f5fa;
+  --primary: #2f6bff;
+  --primary-foreground: #ffffff;
+  --secondary: #141e35;
+  --secondary-foreground: #f3f5fa;
+  --muted: #141e35;
+  --muted-foreground: #a9b4cc;
+  --accent: #141e35;
+  --accent-foreground: #f3f5fa;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: #93c5fd;
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+.marketing {
+  font-family: var(--font-geist), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(.marketing) a {
+  color: inherit;
+  text-decoration: none;
+}
+:where(.marketing) a:focus-visible,
+:where(.marketing) button:focus-visible {
+  outline: 2px solid var(--color-azure-300);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.marketing) *,
+  :where(.marketing) *::before,
+  :where(.marketing) *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Smooth in-page scrolling, only while a marketing page is showing. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.marketing) {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Stacked-sheet section backgrounds: sheet-a glows top right, sheet-b top left */
+@utility sheet-a {
+  background:
+    radial-gradient(900px 440px at 88% 0%, rgb(96 165 250 / 0.11), rgb(96 165 250 / 0) 70%),
+    linear-gradient(180deg, #141e35 0%, #0f172a 380px, #0d1526 100%);
+}
+@utility sheet-b {
+  background:
+    radial-gradient(900px 440px at 12% 0%, rgb(59 130 246 / 0.13), rgb(59 130 246 / 0) 70%),
+    linear-gradient(180deg, #0f1729 0%, #0a101e 380px, #0a0f1c 100%);
+}
+
+@utility bg-hero {
+  background:
+    radial-gradient(1100px 620px at 8% 0%, rgb(96 165 250 / 0.2), rgb(96 165 250 / 0) 70%),
+    radial-gradient(800px 560px at 92% 8%, rgb(202 220 252 / 0.07), rgb(202 220 252 / 0) 70%),
+    linear-gradient(180deg, #0b1120 0%, #0a0f1c 100%);
+}
+
+/* Tile that holds a step illustration */
+@utility bg-stage {
+  background:
+    radial-gradient(340px 230px at 50% 40%, rgb(96 165 250 / 0.16), rgb(96 165 250 / 0) 72%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0.012));
+}
