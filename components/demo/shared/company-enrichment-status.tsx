@@ -49,18 +49,6 @@ export default function CompanyEnrichmentStatus({
     const supabase = getSupabaseBrowserClient();
     let cancelled = false;
 
-    supabase
-      .from("lead_companies")
-      .select("*")
-      .eq("id", companyId)
-      .single()
-      .then(({ data }) => {
-        if (!cancelled && data) {
-          setCompany(data);
-          onStatusChange?.(data.status as LeadCompanyStatus);
-        }
-      });
-
     const channel = supabase
       .channel(`lead-company-${companyId}`)
       .on(
@@ -77,7 +65,22 @@ export default function CompanyEnrichmentStatus({
           onStatusChange?.(row.status as LeadCompanyStatus);
         },
       )
-      .subscribe();
+      // Read the row only once the subscription is live, so a status change
+      // landing between the read and the subscribe can't be missed.
+      .subscribe((subscribeStatus) => {
+        if (subscribeStatus !== "SUBSCRIBED") return;
+        supabase
+          .from("lead_companies")
+          .select("*")
+          .eq("id", companyId)
+          .single()
+          .then(({ data }) => {
+            if (!cancelled && data) {
+              setCompany(data);
+              onStatusChange?.(data.status as LeadCompanyStatus);
+            }
+          });
+      });
 
     return () => {
       cancelled = true;
@@ -160,7 +163,11 @@ export default function CompanyEnrichmentStatus({
       {STEPS.map((step) => {
         const stepIndex = STATUS_ORDER.indexOf(step.status);
         const done = currentIndex > stepIndex;
-        const active = status === step.status;
+        // This component only renders once a workflow has been started, so
+        // "pending" (or not loaded yet) means scraping is about to begin.
+        const active =
+          status === step.status ||
+          (step.status === "scraping" && currentIndex === 0);
 
         return (
           <div key={step.status} className="flex items-center gap-3 text-sm">
