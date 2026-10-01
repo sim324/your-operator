@@ -10,7 +10,7 @@ const STEPS = [
   {
     label: "DIAGNOSE",
     title: "We learn how your team works",
-    body: "It starts with a free 20-minute call about how your team works now. We tell you the first thing worth building.",
+    body: "It starts with a 30-minute call about how your team works now. We tell you the first thing worth building.",
     Illustration: PhoneCall,
   },
   {
@@ -36,8 +36,8 @@ export function HowItWorks() {
       </SectionHeading>
       <SectionLead className="max-w-[860px]">
         It’s like having the person who knows your business best on every call,
-        guiding everyone else. Three steps get you there. The first is a free
-        20-minute call, and you’re fully set up within 90 days.
+        guiding everyone else. Three steps get you there. The first is a 30-minute
+        call, and you’re fully set up within 90 days.
       </SectionLead>
 
       <div className="mx-auto mt-12 grid max-w-[520px] grid-cols-[minmax(0,1fr)] gap-14 md:mt-[52px] xl:max-w-none xl:grid-cols-[351px_474px_351px] xl:justify-between xl:gap-0">

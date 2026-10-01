@@ -11,7 +11,7 @@ export const SITE = {
   /** Cal.com booking popup, opened by any element carrying these data attributes. */
   cal: {
     namespace: "connect",
-    link: "your-operator-sim/connect",
+    link: "your-operator-sim/30min",
     config: JSON.stringify({
       layout: "month_view",
       useSlotsViewOnSmallScreen: "true",
@@ -47,9 +47,9 @@ export const SITE = {
     },
   },
   demo: "/demo",
-  bookLabel: "Book a free 20-minute call",
+  bookLabel: "Book a 30-minute call",
   trust: [
-    "Free 20-minute call",
+    "30-minute call",
     "Custom-built. The IP is yours.",
     "Your team keeps its own voice",
   ],

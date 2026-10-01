@@ -1,25 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Caveat, Geist } from "next/font/google";
+import localFont from "next/font/local";
 import { CalEmbed } from "@/components/site/cal-embed";
 import { Grain } from "@/components/site/grain";
 import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({
+const geist = localFont({
+  src: "../fonts/geist-wght.woff2",
   variable: "--font-geist",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
 
-const bricolage = Bricolage_Grotesque({
+// Variable font with the optical-size axis, so big headlines get the tighter display cut.
+const bricolage = localFont({
+  src: "../fonts/bricolage-grotesque-opsz-wght.woff2",
   variable: "--font-bricolage",
-  subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: "200 800",
+  display: "swap",
 });
 
-const caveat = Caveat({
+const caveat = localFont({
+  src: "../fonts/caveat-wght.woff2",
   variable: "--font-caveat",
-  subsets: ["latin"],
-  weight: ["500", "700"],
+  weight: "400 700",
+  display: "swap",
 });
 
 export const metadata: Metadata = {

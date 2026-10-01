@@ -36,7 +36,7 @@ export function PhoneCall() {
             className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,rgb(255_255_255/0.09)_0%,rgb(255_255_255/0.02)_34%,rgb(255_255_255/0)_35%)]"
           />
           <span className="mt-[50px] text-[10.5px] tracking-[0.06em] text-ink-5">
-            FREE 20-MINUTE CALL
+            30-MINUTE CALL
           </span>
           <span className="mt-3.5 flex size-[58px] items-center justify-center rounded-full bg-[radial-gradient(circle_at_50%_35%,#1e3a8a,#0b1020)] shadow-[0_0_0_1px_rgb(147_197_253/0.35),0_0_26px_rgb(96_165_250/0.45)]">
             <LogoMark width={28} className="drop-shadow-none" />

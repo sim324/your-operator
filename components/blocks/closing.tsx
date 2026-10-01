@@ -21,7 +21,7 @@ export function Closing() {
     <SheetSection
       variant="b"
       id="book"
-      aria-label="Book a free 20-minute call"
+      aria-label="Book a 30-minute call"
       tightBottom
     >
       <div className="flex flex-col items-center text-center">
@@ -61,7 +61,7 @@ export function Closing() {
         className="mt-24 md:mt-32 lg:mt-37.5"
         heading="Put your best coaching"
         dim="in every call."
-        body="Book a free 20-minute call. We look at how your team works now and tell you the first thing worth building."
+        body="Book a 30-minute call. We look at how your team works now and tell you the first thing worth building."
       >
         <Quote
           className="mt-11 text-left"

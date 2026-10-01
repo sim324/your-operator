@@ -7,13 +7,13 @@ export function AboutClosing() {
     <SheetSection
       variant="b"
       id="book"
-      aria-label="Book a free 20-minute call"
+      aria-label="Book a 30-minute call"
       tightBottom
     >
       <FinalCta
         heading="Let’s talk about"
         dim="your team."
-        body="Book a free 20-minute call. I’ll look at how your team works today and tell you the first thing worth building."
+        body="Book a 30-minute call. I’ll look at how your team works today and tell you the first thing worth building."
       />
       <SiteFooter />
     </SheetSection>
