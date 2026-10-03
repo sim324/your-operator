@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { SITE } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type CtaButtonTryProps = Omit<
@@ -22,7 +23,7 @@ export default function CtaButtonTry({
       asChild
       {...props}
     >
-      <Link href="/demo">Try now</Link>
+      <Link href={SITE.demo}>Try now</Link>
     </Button>
   );
 }

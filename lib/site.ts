@@ -46,7 +46,7 @@ export const SITE = {
       },
     },
   },
-  demo: "/demo",
+  demo: "https://www.simbuilds.co/d/halden",
   bookLabel: "Book a 30-minute call",
   trust: [
     "30-minute call",
