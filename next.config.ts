@@ -5,12 +5,12 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/demo",
-        destination: "https://www.simbuilds.co/d/halden",
+        destination: "https://app.youroperator.ai/start",
         permanent: false,
       },
       {
         source: "/demo/:path*",
-        destination: "https://www.simbuilds.co/d/halden",
+        destination: "https://app.youroperator.ai/start",
         permanent: false,
       },
     ];

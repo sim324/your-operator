@@ -46,7 +46,8 @@ export const SITE = {
       },
     },
   },
-  demo: "https://www.simbuilds.co/d/halden",
+  // Every "Try the demo" link: the public start page, where a visitor builds a demo of their own business.
+  demo: "https://app.youroperator.ai/start",
   bookLabel: "Book a 30-minute call",
   trust: [
     "30-minute call",
